@@ -1,0 +1,11 @@
+{
+  "field1" : "$if @drivers[0].audgaydgshdsdsdbsdsud $equal @drivers[0].hedugwswhwdhwn $return yes $otherwise $return no",
+  "field2": "$if @drivers[0].dob $less than 1000 $return Hello $or @drivers[0].dob $greater than 1000 $return Yes",
+  "field3" : "$if @client.dob $greater than 1900 $return PEX (Cross / linked polyethylene) $otherwise $return no",
+  "field4": "$if @client.dob $greater than 1900 $return yes $otherwise $return no",
+  "field5" : "$if @drivers[0].isDeleted $equal true $return yes $otherwise $return no",
+  "field6" : "$if @drivers[0].yearsInsured $greater than 2000 $return hello",
+  "field7" : "$if @drivers[0].id $equal 181 $return @drivers[0].gender",
+  "field8" : "$if @drivers[0].id $not equal 180 $return @drivers[0].dob $otherwise $return yes",
+  "field9" : "$if @drivers[0].id $not equal 181 $return no $otherwise $return @client.name"
+}

@@ -1,0 +1,71 @@
+{
+  "homeType": {
+    "this": {
+      "home": "house",
+      "condo": "condoHouse",
+      "$default": "other"
+    },
+
+    "isHouse": {
+      "home": true,
+      "condo": false,
+      "$default": null
+    }
+  },
+
+  "vehicles": [{
+    "vehicleType": {
+      "this": {
+        "car": "personal vehicle",
+        "bus": "public transportation",
+        "$default": "other"
+      },
+
+      "isPersonal": {
+        "car": true,
+        "bus": false,
+        "$default": null
+      }
+    },
+
+    "drivers": [{
+      "id": {
+        "this": {
+          "D1": "driver1",
+          "D2": "driver2",
+          "D3": "driver3"
+        }
+      }
+    }]
+  }],
+
+  "games": [{
+    "types": [{
+      "type": {
+        "this": {
+          "console": "gaming console"
+        }
+      }
+    }]
+  }],
+
+  "metaInfo": {
+    "isValid": {
+      "this": {
+        "TRUE": true,
+        "FALSE": false,
+        "$default": null
+      }
+    }
+  },
+
+  "boolArray": [{
+    "isDone": {
+      "this": {
+        "True": true,
+        "False": false,
+        "Unknown": null
+      }
+    }
+  }]
+}

@@ -1,0 +1,10 @@
+{
+  "client": {
+    "name": "@clientName",
+    "age": "@clientAge",
+    "address": {
+      "streetNumber": "@clientStreetAddress",
+      "streetName": "@clientStreetName"
+    }
+  }
+}

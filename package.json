@@ -1,0 +1,21 @@
+{
+  "name": "sharp-mapper",
+  "version": "1.2.2",
+  "description": "JavaScript mapping module",
+  "main": "index.js",
+  "scripts": {
+    "test": "./node_modules/mocha/bin/mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://gitlab.com/codetouch/sharpone/sharp-mapper"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "chai": "^4.1.2",
+    "lodash": "^4.17.4",
+    "mocha": "^4.0.1",
+    "moment": "^2.19.3"
+  }
+}

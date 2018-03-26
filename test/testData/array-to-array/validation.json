@@ -1,0 +1,29 @@
+{
+  "vehicles": [
+    {
+      "details": {
+        "id": "1",
+        "model": "Jaguar",
+        "year": 2000,
+        "objectID": "77",
+        "newValue": 2
+      }
+    }, {
+      "details": {
+        "id": "2",
+        "model": "BMW",
+        "year": 2012,
+        "objectID": "77",
+        "newValue": 2
+      }
+    }, {
+      "details": {
+        "id": "13",
+        "model": "Harvey",
+        "year": 2003,
+        "objectID": "77",
+        "newValue": 2
+      }
+    }
+  ]
+}

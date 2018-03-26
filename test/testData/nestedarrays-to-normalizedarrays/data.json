@@ -1,0 +1,38 @@
+{
+  "vehicles": [
+    {
+      "id": "1",
+      "name": "vehicle1",
+      "claims": [
+        {
+          "id": "a",
+          "name": "c11"
+        }, {
+          "id": "b",
+          "name": "c12"
+        }
+      ]
+    }, {
+      "id": "2",
+      "name": "vehicle2",
+      "claims": [
+        {
+          "id": "c",
+          "name": "c21"
+        }, {
+          "id": "d",
+          "name": "c22"
+        }
+      ]
+    }
+  ],
+
+  "motorcycles": [{
+    "id": "3",
+    "name": "motorcycle1",
+    "claims": [{
+      "id": "e",
+      "name": "c31"
+    }]
+  }]
+}

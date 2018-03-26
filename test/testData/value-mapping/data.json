@@ -1,0 +1,47 @@
+{
+  "homeType": "home",
+  "mainId": "2",
+  "vehicles": [{
+    "id": "1",
+    "vehicleType": "something else",
+    "drivers": [{
+      "id": "D1"
+    }]
+  }, {
+    "id": "2",
+    "vehicleType": "car",
+    "drivers": [{
+      "id": "D2"
+    }, {
+      "id": "D3"
+    }]
+  }],
+
+  "homes": [{
+    "id": "1"
+  }, {
+    "id": "2"
+  }],
+
+  "games": [{
+    "types": [{
+      "type": "console",
+      "name": "type11"
+    }],
+
+    "id": 2
+  }],
+
+  "metaInfo": {
+    "isValid": "TRUE",
+    "name": "Test"
+  },
+
+  "boolArray": [{
+    "isDone": "True"
+  }, {
+    "isDone": "False"
+  }, {
+    "isDone": "Unknown"
+  }]
+}

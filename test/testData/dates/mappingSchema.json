@@ -1,0 +1,12 @@
+{
+  "clientFullDate" : "$date @client.date $format YYYY-MM-DD hh:mm:ss a",
+  "clientDate": "$date @client.date $format YYYY-MM-DD",
+  "clientDateTime": "$date @client.date $format hh:mm:ss a",
+  "clientDateYear": "$date @client.date $format YYYY",
+  "clientDateMonth": "$date @client.date $format MM",
+  "clientDateDay": "$date @client.date $format DD",
+  "clientDateHour": "$date @client.date $format hh",
+  "clientDateMin": "$date @client.date $format mm",
+  "clientDateSec": "$date @client.date $format ss",
+  "clientDateAmPm": "$date @client.date $format a"
+}

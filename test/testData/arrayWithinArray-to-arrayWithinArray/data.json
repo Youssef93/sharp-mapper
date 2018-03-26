@@ -1,0 +1,49 @@
+{
+  "quoteId": "77",
+  "cars": [
+    {
+      "id": "1",
+      "model": "Jaguar",
+      "year": 2000,
+      "drivers": [
+        {
+          "id": "d1id1",
+          "name": "Test1"
+        }, {
+          "id": "d1id2",
+          "name": "Test2"
+        }
+      ]
+    }, {
+      "id": "2",
+      "model": "BMW",
+      "year": 2012,
+      "drivers": [
+        {
+          "id": "d2id1",
+          "name": "Test12"
+        }, {
+          "id": "d2id2",
+          "name": "Test22"
+        }
+      ]
+    }
+  ],
+
+  "motorcycles": [
+    {
+      "id": "13",
+      "model": "Harvey",
+      "year": 2003,
+      "drivers": [
+        {
+          "id": "dtest1",
+          "name": "Test1"
+        }, {
+          "id": "dtest2",
+          "name": "Test2"
+        }
+      ]
+    }
+  ]
+}
