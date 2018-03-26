@@ -1,13 +1,13 @@
 module.exports = {
   mappingTypes: [{
-      regex: /^[@a-zA-Z\[\]0-9.:-]* \$concat( \$with '.*')* [@a-zA-Z\[\]0-9.:-]+/g,
+      regex: /^[@a-zA-Z\[\]0-9.:-_]* \$concat( \$with '.*')* [@a-zA-Z\[\]0-9.:-_]+/g,
       mapper: 'concat'
     },
     {
       regex: /^@/,
       mapper: 'variable'
     }, {
-      regex: /^ *(\$date) *([@a-zA-Z\[\]0-9.:-]* \$format *[a-zA-Z\/0-9.:-\s]*)\w+/g,
+      regex: /^ *(\$date) *([@a-zA-Z\[\]0-9.:-_]* \$format *[a-zA-Z\/0-9.:-\s]*)\w+/g,
       mapper: 'date',
     }, {
       regex: /^ *\$if/g,
@@ -38,17 +38,17 @@ module.exports = {
   },
 
   arrayMappingTypes: [{
-    regex: /^[\)\(@a-z\[\]A-Z0-9.\/\-]* *(\$\$and [\)\(@a-z\[\]A-Z0-9.\/\-]*)*/g,
+    regex: /^[\)\(@a-z\[\]A-Z0-9.\/\-_]* *(\$\$and [\)\(@a-z\[\]A-Z0-9.\/\-_]*)*/g,
     mapper: 'getPaths'
   }],
 
   conditionRegexs: {
     caseReg: new RegExp(
-      /([\)\(@a-z\[\]A-Z0-9.\/\-]* (\$equal|\$greater than|\$less than|\$not equal) [\)\(@a-z\[\]A-Z0-9.\s\/\-]* \$return [\\@a-zA-Z\(\)0-9.\s\/\-\[\]]*)/g
+      /([\)\(@a-z\[\]A-Z0-9.\/\-_]* (\$equal|\$greater than|\$less than|\$not equal) [\)\(@a-z\[\]A-Z0-9.\s\/\-_]* \$return [\\@a-zA-Z\(\)0-9.\s\/\-\[\]_]*)/g
     ),
 
     otherwiseReg: new RegExp(
-      /(\$otherwise \$return [\\@a-zA-Z\(\)0-9.\s\/\-\[\]]*)/g
+      /(\$otherwise \$return [\\@a-zA-Z\(\)0-9.\s\/\-\[\]_]*)/g
     ),
 
     expValuesReg: new RegExp(
