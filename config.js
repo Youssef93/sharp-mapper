@@ -1,17 +1,22 @@
 module.exports = {
   mappingTypes: [{
-    regex: /^@/,
-    mapper: 'variable'
-  }, {
-    regex: /^ *(\$date) *([@a-zA-Z\[\]0-9.:-]* \$format *[a-zA-Z\/0-9.:-\s]*)\w+/g,
-    mapper: 'date',
-  }, {
-    regex: /^ *\$if/g,
-    mapper: 'ifConditions',
-  }, {
-    regex: /.*/,
-    mapper: 'constant'
-  }],
+      regex: /^[@a-zA-Z\[\]0-9.:-]* \$concat( \$with '.*')* [@a-zA-Z\[\]0-9.:-]+/g,
+      mapper: 'concat'
+    },
+    {
+      regex: /^@/,
+      mapper: 'variable'
+    }, {
+      regex: /^ *(\$date) *([@a-zA-Z\[\]0-9.:-]* \$format *[a-zA-Z\/0-9.:-\s]*)\w+/g,
+      mapper: 'date',
+    }, {
+      regex: /^ *\$if/g,
+      mapper: 'ifConditions',
+    }, {
+      regex: /.*/,
+      mapper: 'constant'
+    }
+  ],
 
   arrayIdentifier: "$$repeat$$",
   arrayToArraySplitter: '$$and',
@@ -20,6 +25,11 @@ module.exports = {
   dates: {
     head: '$date',
     formatter: '$format'
+  },
+
+  concatination: {
+    splitter: '$concat',
+    customConcat: '$with'
   },
 
   valueMapping: {

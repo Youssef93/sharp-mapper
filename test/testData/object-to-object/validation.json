@@ -5,6 +5,9 @@
     "address": {
       "streetNumber": "15 street 1",
       "streetName": "Rue de avenue"
-    }
+    },
+
+    "childName": "Mr. JoeHeat-Marg",
+    "anotherFormName": "Mr. Joe Marg Heat"
   }
 }

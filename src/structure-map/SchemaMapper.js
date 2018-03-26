@@ -54,6 +54,42 @@ class SchemaMapper extends BaseMapper {
     return result;
   }
 
+  concat(data, path, currentPath) {
+    const partsToConcat = _.split(path, this.config.concatination.splitter);
+    const concatParts = _.map(partsToConcat, (valueToCalculate) => {
+      const concatinationData = this._prepareForConcatination(valueToCalculate);
+      let mappingType = this.getMappingType(concatinationData.itemToCalculate);
+      concatinationData.itemToCalculate =
+       _.cloneDeep(this[mappingType.mapper](data, concatinationData.itemToCalculate, currentPath));
+
+      return concatinationData;
+    });
+
+    let finalStr = '';
+    _.forEach(concatParts, (concatData) => {
+      finalStr += concatData.concatSplitter + concatData.itemToCalculate;
+    });
+
+    return _.trim(finalStr);
+  }
+
+  _prepareForConcatination(item) {
+
+    const concatinationData = {
+      concatSplitter: ' ',
+      itemToCalculate: _.trim(item)
+    };
+
+    if(_.startsWith(_.trim(item), this.config.concatination.customConcat)) {
+      const start = _.indexOf(item, '\'');
+      const end = _.lastIndexOf(item, '\'');
+      concatinationData.concatSplitter = item.substring(start + 1, end);
+      concatinationData.itemToCalculate = _.trim(item.substring(end + 1));
+    }
+
+    return concatinationData;
+  }
+
   _compare(data, path, currentPath) {
     const expValues = this._formatStrArray(path
       .replace(this.config.conditionRegexs.expValuesReg, '%|%')

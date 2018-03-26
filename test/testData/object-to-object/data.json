@@ -2,5 +2,8 @@
   "clientName": "Sharp",
   "clientAge": 15,
   "clientStreetAddress": "15 street 1",
-  "clientStreetName": "Rue de avenue"
+  "clientStreetName": "Rue de avenue",
+  "childFirstName": "Joe",
+  "childMiddleName": "Heat",
+  "childLastName": "Marg"
 }

@@ -5,6 +5,9 @@
     "address": {
       "streetNumber": "@clientStreetAddress",
       "streetName": "@clientStreetName"
-    }
+    },
+
+    "childName": "Mr. $concat @childFirstName $concat $with '' @childMiddleName $concat $with '-' @childLastName",
+    "anotherFormName": "Mr. $concat @childFirstName $concat @childLastName $concat @childMiddleName"
   }
 }
