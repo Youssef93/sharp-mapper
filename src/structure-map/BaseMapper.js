@@ -7,9 +7,13 @@ class BaseMapper {
     this.config = config;
   }
 
+  mapBasedOnSchema(data, mappingValue, currentPath) {
+    const { mapper } = this.getMappingType(mappingValue);
+    return this[mapper](data, mappingValue, currentPath);
+  }
+
   getMappingType(value) {
     value = _.toString(value);
-
     return  _.find(this.config.mappingTypes, (mType) => {
       return value.match(mType.regex);
     });
