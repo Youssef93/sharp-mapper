@@ -8,15 +8,8 @@ class BaseMapper {
   }
 
   mapBasedOnSchema(data, mappingValue, currentPath) {
-    const { mapper } = this.getMappingType(mappingValue);
+    const { mapper } = this._getMappingType(mappingValue);
     return this[mapper](data, mappingValue, currentPath);
-  }
-
-  getMappingType(value) {
-    value = _.toString(value);
-    return  _.find(this.config.mappingTypes, (mType) => {
-      return value.match(mType.regex);
-    });
   }
 
   constant(data, constant) {
@@ -27,6 +20,13 @@ class BaseMapper {
     path = this._replacePointer(path, currentPath);
     path = path.replace('@', '');
     return _.get(data, path);
+  }
+
+  _getMappingType(value) {
+    value = _.toString(value);
+    return  _.find(this.config.mappingTypes, (mType) => {
+      return value.match(mType.regex);
+    });
   }
 
   _replacePointer(path, currentPath) {

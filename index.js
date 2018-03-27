@@ -46,8 +46,7 @@ const _structureMap = function(data, schema, currentPath) {
     }
 
     else {
-      const mappingType = SchemaMapper.getMappingType(desiredOutput);
-      mappedObject[schemaKey] = SchemaMapper[mappingType.mapper](data, desiredOutput, currentPath);
+      mappedObject[schemaKey] = SchemaMapper.mapBasedOnSchema(data, desiredOutput, currentPath);
     }
   });
 

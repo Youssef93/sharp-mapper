@@ -17,8 +17,7 @@ class SchemaMapper extends BaseMapper {
       return _.trim(item);
     });
 
-    const { mapper } = this.getMappingType(_.head(expressionParts));
-    const dateValue = this[mapper](data, _.head(expressionParts), currentPath);
+    const dateValue = this.mapBasedOnSchema(data, _.head(expressionParts), currentPath);
 
     if(_.isNil(dateValue))
       return null;
@@ -45,8 +44,7 @@ class SchemaMapper extends BaseMapper {
       if (otherwise) {
         otherwise = otherwise.split(' ')[2];
         if (otherwise) {
-          let mappingType = this.getMappingType(otherwise);
-          result = this[mappingType.mapper](data, otherwise, currentPath);
+          result = this.mapBasedOnSchema(data, otherwise, currentPath);
         }
       }
     }
@@ -58,10 +56,7 @@ class SchemaMapper extends BaseMapper {
     const partsToConcat = _.split(path, this.config.concatination.splitter);
     const concatParts = _.map(partsToConcat, (valueToCalculate) => {
       const concatinationData = this._prepareForConcatination(valueToCalculate);
-      let mappingType = this.getMappingType(concatinationData.itemToCalculate);
-      concatinationData.itemToCalculate =
-       _.cloneDeep(this[mappingType.mapper](data, concatinationData.itemToCalculate, currentPath));
-
+      concatinationData.itemToCalculate = _.cloneDeep(this.mapBasedOnSchema(data, concatinationData.itemToCalculate, currentPath));
       return concatinationData;
     });
 
@@ -94,14 +89,12 @@ class SchemaMapper extends BaseMapper {
     const expValues = this._formatStrArray(path
       .replace(this.config.conditionRegexs.expValuesReg, '%|%')
       .split('%|%'));
-    let mappingType = this.getMappingType(expValues[0]);
-    let firstValue = this[mappingType.mapper](data, expValues[0], currentPath);
 
-    mappingType = this.getMappingType(expValues[1])
-    let secondValue = this[mappingType.mapper](data, expValues[1], currentPath);
+    let firstValue = this.mapBasedOnSchema(data, expValues[0], currentPath);
+    
+    let secondValue = this.mapBasedOnSchema(data, expValues[1], currentPath);
 
-    mappingType = this.getMappingType(expValues[2]);
-    const returnValue = this[mappingType.mapper](data, expValues[2], currentPath);
+    const returnValue = this.mapBasedOnSchema(data, expValues[2], currentPath);
 
     const comparator = _.head(path.match(this.config.conditionRegexs.comparatorReg));
 
