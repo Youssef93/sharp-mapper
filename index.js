@@ -1,5 +1,14 @@
 "use strict";
 
+/*
+  write test cases for the following:
+   -- mapping array not found
+   -- mapping array which found to be either object or primitive value
+   -- mapping of array.object.array, example: vehicles.otherDetails.claims
+   -- mapping of object.array, example: otherDetails.vehicles
+  solve "null" item found in array mapping
+*/
+
 const _ = require('lodash');
 const config = require('./config');
 const schemaMapper = require('./src/structure-map/SchemaMapper');

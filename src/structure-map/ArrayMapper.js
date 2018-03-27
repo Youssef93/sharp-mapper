@@ -8,55 +8,56 @@ class ArrayMapper extends BaseMapper {
     super(config);
   }
 
-  getPaths(data, currentPath, identifierValue) {
+  getPaths(data, currentPath, repeatValue) {
     currentPath = _.toString(currentPath);
 
-    const splitter = this.config.arrayToArraySplitter;
-
-    let splittedWrittenPaths = identifierValue.split(splitter);
-    splittedWrittenPaths = _.map(splittedWrittenPaths, (arrItem) => {
-      return _.trim(arrItem);
-    });
-
+    let valuesToRepeatMappingOn = repeatValue.split(this.config.arrayToArraySplitter);
+    valuesToRepeatMappingOn = _.map(valuesToRepeatMappingOn, (item) => _.trim(item));
     let allPaths = [];
-    _.forEach(splittedWrittenPaths, (path) => {
-      const actualPaths = this._changeWrittenPathToActualPaths(path, data, currentPath);
+
+    _.forEach(valuesToRepeatMappingOn, (path) => {
+      const actualPaths = this._changeWrittenPathToActualPaths(data, path, currentPath);
       allPaths = _.concat(allPaths, actualPaths);
     });
 
     return allPaths;
   }
 
-  _changeWrittenPathToActualPaths(writtenPath, data, currentPath) {
-    let splittedWrittenPaths = this._splitBasedOnPath(writtenPath);
-    const starter = _.head(splittedWrittenPaths);
-    let extractedPaths = this._extractPaths(starter, data, currentPath);
+  _changeWrittenPathToActualPaths(data, writtenPath, currentPath) {
+    let subPathsList = this._splitBasedOnPath(writtenPath);
+    const headSubPath = _.head(subPathsList);
+    let extractedPaths = this._repeatPathBasedOnArrayLength(headSubPath, data, currentPath);
 
-    splittedWrittenPaths = _.tail(splittedWrittenPaths);
-    while(! _.isEmpty(splittedWrittenPaths)) {
+    subPathsList = _.tail(subPathsList);
+    while(! _.isEmpty(subPathsList)) {
 
       let concatinatedPaths = [];
       _.forEach(extractedPaths, (mainPath) => {
-        const actualPaths = this._extractPaths(mainPath + '.' + _.head(splittedWrittenPaths), data, currentPath);
-        concatinatedPaths = _.concat(concatinatedPaths, actualPaths);
+        const newExtractedPaths = this._repeatPathBasedOnArrayLength(mainPath + '.' + _.head(subPathsList), data, currentPath);
+        concatinatedPaths = _.concat(concatinatedPaths, newExtractedPaths);
       });
 
       extractedPaths = _.cloneDeep(concatinatedPaths);
-      splittedWrittenPaths = _.tail(splittedWrittenPaths);
+      subPathsList = _.tail(subPathsList);
     }
 
     return extractedPaths;
   }
 
-  _splitBasedOnPath(value) {
-    value = value.split('.');
-    if(_.head(value).match(/^@this[0-9]*/)) {
-      const newHead = _.head(value) + '.' + value[1];
-      const newValue = _.tail(_.tail(value));
-      value = _.concat([newHead], newValue);
+  /*
+    if first item in the path contains the this pointer (example @this.drivers...)
+    we need to keep the first item @this.drivers while splitting the remainder path
+    because the mapper can understand @this.drivers while cannot understand @this only
+  */
+  _splitBasedOnPath(path) {
+    path = path.split('.');
+    if(_.head(path).match(/^@this[0-9]*/)) {
+      const newHead = _.head(path) + '.' + path[1];
+      const newTail = _.drop(path, 2);
+      path = _.concat([newHead], newTail);
     }
 
-    return value;
+    return path;
   }
 
   _calculateNewCurrentPath(currentPath) {
@@ -67,22 +68,16 @@ class ArrayMapper extends BaseMapper {
     return currentPath + '.';
   }
 
-  _extractPaths(pathName, data, currentPath) {
+  _repeatPathBasedOnArrayLength(pathName, data, currentPath) {
     pathName = this._replacePointer(pathName, currentPath);
     const starter = this._calculateNewCurrentPath(currentPath);
-
     const dataToGet = this.variable(data, pathName, currentPath);
 
-    if(!_.isArray(dataToGet)) {
-      return [pathName];
+    if(! _.isArray(dataToGet)) {
+      throw new Error('array not found');
     }
 
-    const names = [];
-    _.forEach(dataToGet, (item, index) => {
-      names.push(pathName + '[' + index + ']');
-    });
-
-    return names;
+    return _.map(dataToGet, (item, index) => pathName + '[' + index + ']');
   }
 };
 
