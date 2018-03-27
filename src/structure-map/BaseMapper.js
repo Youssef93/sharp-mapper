@@ -18,8 +18,12 @@ class BaseMapper {
 
   variable(data, path, currentPath) {
     path = this._replacePointer(path, currentPath);
-    path = path.replace('@', '');
+    path = this._removeVariableIdentifier(path);
     return _.get(data, path);
+  }
+
+  _removeVariableIdentifier(path) {
+    return path.replace('@', '');
   }
 
   _getMappingType(value) {
@@ -40,7 +44,9 @@ class BaseMapper {
 
     if(_.isNil(numberOfPathsToDrop)) {
       numberOfPathsToDrop = 0;
-    } else {
+    } 
+    
+    else {
       numberOfPathsToDrop = parseInt(numberOfPathsToDrop);
     }
 
