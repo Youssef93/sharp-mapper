@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 const _ = require('lodash');
 const config = require('./config');
@@ -8,7 +8,19 @@ const valueMapper = require('./src/value-map/ValueMapper');
 const SchemaMapper = new schemaMapper(config);
 const ArrayMapper = new arrayMapper(config);
 
-const { mappingTypes } = config;
+const removeUndefinedValues = function(object) {
+  return JSON.parse(JSON.stringify(object));
+};
+
+const format = function(mappedObject, removeUndefinedFlag) {
+  removeUndefinedFlag = removeUndefinedFlag || false;
+
+  if(removeUndefinedFlag) {
+    mappedObject = removeUndefinedValues(mappedObject);
+  }
+
+  return mappedObject;
+};
 
 const getArrayPaths = function(data, schema, key, currentPath) {
   const { arrayIdentifier } = config;
@@ -25,61 +37,85 @@ const getArrayPaths = function(data, schema, key, currentPath) {
   return ArrayMapper[mapper](data, currentPath, identifierValue);
 };
 
+const getSubSchemaForArray = function(schema, schemaKey) {
+  const arrayMapping = _.get(schema, schemaKey);
+  const itemInsideArrayMapping = _.cloneDeep(_.head(arrayMapping));
+  _.unset(itemInsideArrayMapping, config.arrayIdentifier);
+  return itemInsideArrayMapping;
+}
+
 const _structureMap = function(data, schema, currentPath) {
   currentPath = _.toString(currentPath);
-  let mappedObject = {};
+  const mappedObject = {};
 
   _.forOwn(schema, (schemaValue, schemaKey) => {
-    const desiredOutput = schemaValue;
+    const desiredOutput = _.cloneDeep(schemaValue);
 
     if(_.isArray(desiredOutput)) {
-      const arrayPathsToGet = getArrayPaths(data, schema, schemaKey, currentPath);
-      mappedObject[schemaKey] = _.map(arrayPathsToGet, (path) => {
-        let mappedArray = _structureMap(data, schema[schemaKey][0], path);
-        mappedArray = _.pickBy(mappedArray, (item) => ! _.isNil(item));
-        return mappedArray;
+      const actualArrayPaths = getArrayPaths(data, schema, schemaKey, currentPath);
+      const mappedArray = _.map(actualArrayPaths, (path) => {
+        const subSchemaForArrayItem = getSubSchemaForArray(schema, schemaKey);
+        return _structureMap(data, subSchemaForArrayItem, path);
       });
+
+      _.set(mappedObject, schemaKey, mappedArray);
     }
 
     else if(_.isObject(desiredOutput)) {
-      mappedObject[schemaKey] = _structureMap(data, schema[schemaKey], currentPath);
+      const subSchemaForObject = _.get(schema, schemaKey);
+      const subMappedObject = _structureMap(data, subSchemaForObject, currentPath);
+      _.set(mappedObject, schemaKey, subMappedObject);
     }
 
     else {
-      const mappingType = SchemaMapper.getMappingType(desiredOutput);
-      mappedObject[schemaKey] = SchemaMapper[mappingType.mapper](data, desiredOutput, currentPath);
+      const mappedItem = SchemaMapper.mapBasedOnSchema(data, desiredOutput, currentPath);
+      _.set(mappedObject, schemaKey, mappedItem);
     }
   });
 
-  _.unset(mappedObject, config.arrayIdentifier)
   return mappedObject;
 };
 
-const structureMap = function(data, schema) {
-  return _structureMap(data, schema, "");
+const structureMap = function(data, schema, removeUndefinedFlag) {
+  const mappedObject = _structureMap(data, schema, '');
+  
+  return format(mappedObject, removeUndefinedFlag);
 };
 
-const valueMap = function(data, schema) {
+const valueMap = function(objectToMap, schema, removeUndefinedFlag) {
   const ValueMapper = new valueMapper(config, schema);
 
-  let mappedObject = {};
-  _.forOwn(data, (dataValue, dataKey) => {
-    if(_.isArray(dataValue)) {
-      const mappedArray = _.map(dataValue, (item) => {
-        const subSchema = _.get(schema, dataKey);
-        return valueMap(item, _.head(subSchema));
+  const mappedObject = {};
+
+  _.forOwn(objectToMap, (valueToMap, key) => {
+    if(_.isArray(valueToMap)) {
+      const mappedArray = _.map(valueToMap, (arrayItem) => {
+        const schemaForArrayItem = _.head(_.get(schema, key));
+        return valueMap(arrayItem, schemaForArrayItem);
       });
 
-      mappedObject[dataKey] = _.cloneDeep(mappedArray);
-    } else if(_.isObject(dataValue)) {
-      const subSchema = _.get(schema, dataKey);
-      mappedObject[dataKey] = valueMap(dataValue, subSchema);
-    } else {
-      mappedObject = _.merge(mappedObject, ValueMapper.mapValue(dataValue, dataKey));
+      _.set(mappedObject, key, mappedArray);
+    }
+
+    else if(_.isDate(valueToMap)) {
+      valueToMap = JSON.stringify(valueToMap);
+      const mappedData = ValueMapper.mapValue(valueToMap, key);
+      _.merge(mappedObject, mappedData);
+    }
+
+    else if(_.isObject(valueToMap)) {
+      const subSchemaForObject = _.get(schema, key);
+      const mappedSubObject = valueMap(valueToMap, subSchemaForObject);
+      _.set(mappedObject, key, mappedSubObject);
+    }
+
+    else {
+      const mappedData = ValueMapper.mapValue(valueToMap, key);
+      _.merge(mappedObject, mappedData);
     }
   });
 
-  return mappedObject;
-}
+  return format(mappedObject, removeUndefinedFlag);
+};
 
 module.exports = { structureMap, valueMap };

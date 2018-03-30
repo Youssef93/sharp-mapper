@@ -8,46 +8,64 @@ class ValueMapper {
     this.schema = schema;
   }
 
-  mapValue(value, key) {
-    if(_.isObject(value)) {
+  mapValue(valueToMap, keyInMainObject) {
+    if(_.isObject(valueToMap)) {
       throw new Error('Cannot have an object in the value mapping schema');
     }
 
-    if(this._isFoundInSchema(key)) {
-      return this._map(value, key);
-    } else {
-      const mappedObject = {};
-      mappedObject[key] = value;
-      return mappedObject;
+    if(this._isFoundInSchema(keyInMainObject)) {
+      return this._map(valueToMap, keyInMainObject);
+    } 
+    
+    else {
+      return this._returnSameValue(valueToMap, keyInMainObject);
     }
   }
 
-  _map(value, key) {
+  _returnSameValue(value, key) {
     const mappedObject = {};
-    let mappingSchema = _.cloneDeep(this.schema[key]);
-    mappingSchema[key] = mappingSchema[this.config.valueMapping.pointer];
-    _.unset(mappingSchema, this.config.valueMapping.pointer);
+    mappedObject[key] = value;
+    return mappedObject;
+  }
 
-    mappingSchema = _.pickBy(mappingSchema, (schemaValue) => {
-      return ! _.isNil(schemaValue);
-    });
+  _map(valueToMap, keyInMainObject) {
+    const mappedObject = {};
 
-    _.forOwn(mappingSchema, (schemaValue, schemaKey) => {
+    let schemaForThisKey = _.cloneDeep(_.get(this.schema, keyInMainObject));
+    schemaForThisKey = this._replacePointerKeyword(schemaForThisKey, keyInMainObject);
+
+    _.forOwn(schemaForThisKey, (enumCases, schemaKey) => {
       let mappedItem;
-      if(_.has(schemaValue, value)) {
-        mappedItem = schemaValue[value];
-      } else {
-        mappedItem = schemaValue[this.config.valueMapping.defaultKeyword];
+
+      if(_.has(enumCases, valueToMap)) {
+        mappedItem = _.get(enumCases, valueToMap);
+      } 
+      
+      else {
+        mappedItem = this._loadDefault(enumCases);
       }
 
-      mappedObject[schemaKey] = mappedItem;
+      _.set(mappedObject, schemaKey, mappedItem);
     });
 
     return mappedObject;
   }
 
-  _isFoundInSchema(key) {
-    return _.has(this.schema, key);
+  _isFoundInSchema(keyInMainObject) {
+    return _.has(this.schema, keyInMainObject);
+  }
+
+  _loadDefault(schemaValue) {
+    return _.get(schemaValue, this.config.valueMapping.defaultKeyword);
+  }
+
+  _replacePointerKeyword(schema, keyInMainObject) {
+    if(_.has(schema, this.config.valueMapping.pointer)) {
+      schema[keyInMainObject] = _.get(schema, this.config.valueMapping.pointer);
+      _.unset(schema, this.config.valueMapping.pointer);
+    }
+    
+    return schema;
   }
 };
 

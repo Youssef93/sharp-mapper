@@ -7,12 +7,9 @@ class BaseMapper {
     this.config = config;
   }
 
-  getMappingType(value) {
-    value = _.toString(value);
-
-    return  _.find(this.config.mappingTypes, (mType) => {
-      return value.match(mType.regex);
-    });
+  mapBasedOnSchema(data, mappingValue, currentPath) {
+    const { mapper } = this._getMappingType(mappingValue);
+    return this[mapper](data, mappingValue, currentPath);
   }
 
   constant(data, constant) {
@@ -21,8 +18,19 @@ class BaseMapper {
 
   variable(data, path, currentPath) {
     path = this._replacePointer(path, currentPath);
-    path = path.replace('@', '');
+    path = this._removeVariableIdentifier(path);
     return _.get(data, path);
+  }
+
+  _removeVariableIdentifier(path) {
+    return path.replace('@', '');
+  }
+
+  _getMappingType(value) {
+    value = _.toString(value);
+    return  _.find(this.config.mappingTypes, (mType) => {
+      return value.match(mType.regex);
+    });
   }
 
   _replacePointer(path, currentPath) {
@@ -36,7 +44,9 @@ class BaseMapper {
 
     if(_.isNil(numberOfPathsToDrop)) {
       numberOfPathsToDrop = 0;
-    } else {
+    } 
+    
+    else {
       numberOfPathsToDrop = parseInt(numberOfPathsToDrop);
     }
 
