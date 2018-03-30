@@ -1,12 +1,7 @@
 'use strict';
 
 /*
-  write test cases for the following:
-   -- mapping array not found
-   -- mapping array which found to be either object or primitive value
-   -- mapping of array.object.array, example: vehicles.otherDetails.claims
-   -- mapping of object.array, example: otherDetails.vehicles
-  solve "null" item found in array mapping
+  - remove undefined data
 */
 
 const _ = require('lodash');
@@ -88,6 +83,12 @@ const valueMap = function(objectToMap, schema) {
       });
 
       _.set(mappedObject, key, mappedArray);
+    }
+
+    else if(_.isDate(valueToMap)) {
+      valueToMap = JSON.stringify(valueToMap);
+      const mappedData = ValueMapper.mapValue(valueToMap, key);
+      _.merge(mappedObject, mappedData);
     }
 
     else if(_.isObject(valueToMap)) {

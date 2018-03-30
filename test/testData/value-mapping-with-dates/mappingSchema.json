@@ -1,0 +1,15 @@
+{
+  "homeType": {
+    "this": {
+      "home": "house",
+      "condo": "condoHouse",
+      "$default": "other"
+    },
+
+    "isHouse": {
+      "home": true,
+      "condo": false,
+      "$default": null
+    }
+  }
+}

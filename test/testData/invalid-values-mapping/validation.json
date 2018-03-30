@@ -1,0 +1,30 @@
+{
+  "allClaims": [
+    {
+      "id": "a",
+      "claimName": null,
+      "parentID": "1",
+      "parentName": "vehicle1"
+    }, {
+      "id": "b",
+      "claimName": "c12",
+      "parentID": "1",
+      "parentName": "vehicle1"
+    }, {
+      "id": "c",
+      "claimName": "c21",
+      "parentID": null,
+      "parentName": "vehicle2"
+    }, {
+      "id": "d",
+      "claimName": "c22",
+      "parentID": null,
+      "parentName": "vehicle2"
+    }, {
+      "id": "e",
+      "claimName": "c31",
+      "parentID": "3",
+      "parentName": "motorcycle1"
+    }
+  ]
+}

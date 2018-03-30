@@ -33,8 +33,15 @@ class ArrayMapper extends BaseMapper {
 
       let concatinatedPaths = [];
       _.forEach(extractedPaths, (mainPath) => {
-        const newExtractedPaths = this._repeatPathBasedOnArrayLength(mainPath + '.' + _.head(subPathsList), data, currentPath);
-        concatinatedPaths = _.concat(concatinatedPaths, newExtractedPaths);
+        try {
+          const newExtractedPaths = this._repeatPathBasedOnArrayLength(mainPath + '.' + _.head(subPathsList), data, currentPath);
+          concatinatedPaths = _.concat(concatinatedPaths, newExtractedPaths);
+        }
+
+        catch(e) {
+          // continue lodash for loop without calculating the path
+          return true;
+        }
       });
 
       extractedPaths = _.cloneDeep(concatinatedPaths);
@@ -73,8 +80,13 @@ class ArrayMapper extends BaseMapper {
     const starter = this._calculateNewCurrentPath(currentPath);
     const dataToGet = this.variable(data, pathName, currentPath);
 
+    if(_.isNil(dataToGet)) {
+      // Error will be caught
+      throw new Error('not an array');
+    }
+
     if(! _.isArray(dataToGet)) {
-      throw new Error('array not found');
+      return [pathName];
     }
 
     return _.map(dataToGet, (item, index) => pathName + '[' + index + ']');
