@@ -1,9 +1,5 @@
 'use strict';
 
-/*
-  - remove undefined data
-*/
-
 const _ = require('lodash');
 const config = require('./config');
 const schemaMapper = require('./src/structure-map/SchemaMapper');
@@ -11,6 +7,20 @@ const arrayMapper = require('./src/structure-map/ArrayMapper');
 const valueMapper = require('./src/value-map/ValueMapper');
 const SchemaMapper = new schemaMapper(config);
 const ArrayMapper = new arrayMapper(config);
+
+const removeUndefinedValues = function(object) {
+  return JSON.parse(JSON.stringify(object));
+};
+
+const format = function(mappedObject, removeUndefinedFlag) {
+  removeUndefinedFlag = removeUndefinedFlag || false;
+
+  if(removeUndefinedFlag) {
+    mappedObject = removeUndefinedValues(mappedObject);
+  }
+
+  return mappedObject;
+};
 
 const getArrayPaths = function(data, schema, key, currentPath) {
   const { arrayIdentifier } = config;
@@ -66,11 +76,13 @@ const _structureMap = function(data, schema, currentPath) {
   return mappedObject;
 };
 
-const structureMap = function(data, schema) {
-  return _structureMap(data, schema, '');
+const structureMap = function(data, schema, removeUndefinedFlag) {
+  const mappedObject = _structureMap(data, schema, '');
+  
+  return format(mappedObject, removeUndefinedFlag);
 };
 
-const valueMap = function(objectToMap, schema) {
+const valueMap = function(objectToMap, schema, removeUndefinedFlag) {
   const ValueMapper = new valueMapper(config, schema);
 
   const mappedObject = {};
@@ -103,7 +115,7 @@ const valueMap = function(objectToMap, schema) {
     }
   });
 
-  return mappedObject;
+  return format(mappedObject, removeUndefinedFlag);
 };
 
 module.exports = { structureMap, valueMap };

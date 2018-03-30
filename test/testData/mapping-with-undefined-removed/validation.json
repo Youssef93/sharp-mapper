@@ -1,0 +1,25 @@
+{
+  "allClaims": [
+    {
+      "id": "a",
+      "claimName": null,
+      "parentID": "1"
+    }, {
+      "id": "b",
+      "claimName": "c12",
+      "parentID": "1"
+    }, {
+      "id": "c",
+      "claimName": "c21",
+      "parentID": null
+    }, {
+      "id": "d",
+      "claimName": "c22",
+      "parentID": null
+    }, {
+      "id": "e",
+      "claimName": "c31",
+      "parentID": "3"
+    }
+  ]
+}
