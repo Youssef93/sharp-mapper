@@ -4,7 +4,8 @@ A Node module that maps Javascript objects from one form to the other.
 
 ```javascript
 var sharpMapper = require('sharp-mapper');
-var mappedObject = sharpMapper.structureMap(oldObject, mappingSchema);
+const REMOVE_UNDEFINED = true;
+var mappedObject = sharpMapper.structureMap(oldObject, mappingSchema, REMOVE_UNDEFINED);
 ```
 
 **Examples:**
@@ -66,6 +67,7 @@ Output:
   - you can add constant string or fetch a value from the data.
   - by default it concatenates the data with a space character. 
   - if you want a custom concatenation, use the `$with` keyword followed by your custom concatenation string wrapped in single quotes `''`
+- Click [here](#removing-undefined-values) know more about the `REMOVE_UNDEFINED` flag
 
 ----------
 
@@ -255,18 +257,18 @@ Schema:
 {
   "vehicles": [{
     "$$repeat$$": "@cars $$and @motorcycles",
-    "details": {
+    "model": "@this.model",
+    "year": "@this.year",
+    "newValue": 2,
+    "identification": {
       "id": "@this.id",
-      "model": "@this.model",
-      "year": "@this.year",
-      "objectID": "@quoteId",
-      "newValue": 2,
-      "drivers": [{
-        "$$repeat$$": "@this.drivers",
-            "id": "@this.id",
-            "parentID": "@this1.id"
-      }]
-    }
+      "objectID": "@quoteId"
+    },
+    "drivers": [{
+      "$$repeat$$": "@this.drivers",
+      "id": "@this.id",
+      "parentID": "@this1.id"
+    }]
   }]
 }
 ```
@@ -274,60 +276,52 @@ Output:
 
 ```json
 {
-  "vehicles": [
-    {
-      "details": {
-        "id": "1",
-        "model": "Jaguar",
-        "year": 2000,
-        "objectID": "77",
-        "newValue": 2,
-        "drivers": [
-          {
-            "id": "d1id1",
-            "parentID": "1"
-          }, {
-            "id": "d1id2",
-            "parentID": "1"
-          }
-        ]
-      }
+  "vehicles": [{
+    "model": "Jaguar",
+    "year": 2000,
+    "newValue": 2,
+    "identification": {
+      "objectID": "77",
+      "id": "1"
+    },
+    "drivers": [{
+      "id": "d1id1",
+      "parentID": "1"
     }, {
-      "details": {
-        "id": "2",
-        "model": "BMW",
-        "year": 2012,
-        "objectID": "77",
-        "newValue": 2,
-        "drivers": [
-          {
-            "id": "d2id1",
-            "parentID": "2"
-          }, {
-            "id": "d2id2",
-            "parentID": "2"
-          }
-        ]
-      }
+      "id": "d1id2",
+      "parentID": "1"
+    }]
+  }, {
+    "model": "BMW",
+    "year": 2012,
+    "newValue": 2,
+    "identification": {
+      "objectID": "77",
+      "id": "2"
+    },
+    "drivers": [{
+      "id": "d2id1",
+      "parentID": "2"
     }, {
-      "details": {
-        "id": "13",
-        "model": "Harvey",
-        "year": 2003,
-        "objectID": "77",
-        "newValue": 2,
-        "drivers": [
-          {
-            "id": "dtest1",
-            "parentID": "13"
-          }, {
-            "id": "dtest2",
-            "parentID": "13"
-          }
-        ]
-      }
-    }
-  ]
+      "id": "d2id2",
+      "parentID": "2"
+    }]
+  }, {
+    "model": "Harvey",
+    "year": 2003,
+    "newValue": 2,
+    "identification": {
+      "objectID": "77",
+      "id": "13"
+    },
+    "drivers": [{
+      "id": "dtest1",
+      "parentID": "13"
+    }, {
+      "id": "dtest2",
+      "parentID": "13"
+    }]
+  }]
 }
 ```
 
@@ -337,40 +331,44 @@ Data:
 
 ```json
 {
-  "vehicles": [
-    {
-      "id": "1",
-      "name": "vehicle1",
-      "claims": [
-        {
-          "id": "a",
-          "name": "c11"
-        }, {
-          "id": "b",
-          "name": "c12"
-        }
-      ]
+  "vehicles": [{
+    "id": "1",
+    "model": "Jaguar",
+    "year": 2000,
+    "objectID": "77",
+    "newValue": 2,
+    "drivers": [{
+      "id": "d1id1",
+      "parentID": "1"
     }, {
-      "id": "2",
-      "name": "vehicle2",
-      "claims": [
-        {
-          "id": "c",
-          "name": "c21"
-        }, {
-          "id": "d",
-          "name": "c22"
-        }
-      ]
-    }
-  ],
-
-  "motorcycles": [{
-    "id": "3",
-    "name": "motorcycle1",
-    "claims": [{
-      "id": "e",
-      "name": "c31"
+      "id": "d1id2",
+      "parentID": "1"
+    }]
+  }, {
+    "id": "2",
+    "model": "BMW",
+    "year": 2012,
+    "objectID": "77",
+    "newValue": 2,
+    "drivers": [{
+      "id": "d2id1",
+      "parentID": "2"
+    }, {
+      "id": "d2id2",
+      "parentID": "2"
+    }]
+  }, {
+    "id": "13",
+    "model": "Harvey",
+    "year": 2003,
+    "objectID": "77",
+    "newValue": 2,
+    "drivers": [{
+      "id": "dtest1",
+      "parentID": "13"
+    }, {
+      "id": "dtest2",
+      "parentID": "13"
     }]
   }]
 }
@@ -437,12 +435,15 @@ Output:
 
 ```javascript
 var sharpMapper = require('sharp-mapper');
-var mappedObject = sharpMapper.valueMap(oldObject, mappingSchema);
+const REMOVE_UNDEFINED = true
+var mappedObject = sharpMapper.valueMap(oldObject, mappingSchema, REMOVE_UNDEFINED);
 ```
 
 This is a mapping module to map from certain set of enumeration to another set of enumerations
 
 Since this mapping is does NOT map the object from one structure to the other. the structure of the mapping schema should match the structure of the original object.
+
+Click [here](#removing-undefined-values) know more about the `REMOVE_UNDEFINED` flag
 
 ### **Features:**
 
@@ -708,3 +709,145 @@ Output:
   }
 }
 ```
+
+
+
+------
+
+## Removing Undefined Values
+
+- This flag removes all values set to `undefined ` after the mapping is finished.
+- It's used in both types of mapping `structureMap` & `valueMap`
+- Values are set to undefined if the schema could not be mapped to anything in the object.
+- Example using `structureMap` where in the mapping schema, `parentName` value is not found
+
+Data:
+
+```json
+{
+  "vehicles": [
+    {
+      "id": "1",
+      "name": "vehicle1",
+      "claims": [
+        {
+          "id": "a",
+          "name": null
+        }, {
+          "id": "b",
+          "name": "c12"
+        }
+      ]
+    }, {
+      "id": null,
+      "name": "vehicle2",
+      "claims": [
+        {
+          "id": "c",
+          "name": "c21"
+        }, {
+          "id": "d",
+          "name": "c22"
+        }
+      ]
+    }
+  ],
+
+  "motorcycles": [{
+    "id": "3",
+    "name": "motorcycle1",
+    "claims": [{
+      "id": "e",
+      "name": "c31"
+    }]
+  }]
+}
+
+```
+
+Schema:
+
+```json
+{
+  "allClaims": [
+    {
+      "$$repeat$$": "@vehicles.claims $$and @motorcycles.claims",
+      "id": "@this.id",
+      "claimName": "@this.name",
+      "parentID": "@this1.id",
+      "parentName": "@this2.parentIdentifier"
+    }
+  ]
+}
+
+```
+
+Output (if flag is set to true):
+
+```json
+{
+  "allClaims": [
+    {
+      "id": "a",
+      "claimName": null,
+      "parentID": "1"
+    }, {
+      "id": "b",
+      "claimName": "c12",
+      "parentID": "1"
+    }, {
+      "id": "c",
+      "claimName": "c21",
+      "parentID": null
+    }, {
+      "id": "d",
+      "claimName": "c22",
+      "parentID": null
+    }, {
+      "id": "e",
+      "claimName": "c31",
+      "parentID": "3"
+    }
+  ]
+}
+
+```
+
+Output (if flag is set to false):
+
+```json
+{
+  "allClaims": [{
+      "id": "a",
+      "claimName": null,
+      "parentID": "1",
+      "parentName": undefined
+    },
+    {
+      "id": "b",
+      "claimName": "c12",
+      "parentID": "1",
+      "parentName": undefined
+    },
+    {
+      "id": "c",
+      "claimName": "c21",
+      "parentID": null,
+      "parentName": undefined
+    },
+    {
+      "id": "d",
+      "claimName": "c22",
+      "parentID": null,
+      "parentName": undefined
+    },
+    {
+      "id": "e",
+      "claimName": "c31",
+      "parentID": "3",
+      "parentName": undefined
+    }
+  ]
+}
+```
+
