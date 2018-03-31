@@ -13,8 +13,6 @@ const removeUndefinedValues = function(object) {
 };
 
 const format = function(mappedObject, removeUndefinedFlag) {
-  removeUndefinedFlag = removeUndefinedFlag || false;
-
   if(removeUndefinedFlag) {
     mappedObject = removeUndefinedValues(mappedObject);
   }
