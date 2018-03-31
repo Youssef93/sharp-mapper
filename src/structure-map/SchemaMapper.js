@@ -147,7 +147,7 @@ class SchemaMapper extends BaseMapper {
       return null;
     }
 
-    let result = null;
+    let comparisonResult = null;
 
     const compareFunction = this.comparators[comparator];
 
@@ -155,11 +155,13 @@ class SchemaMapper extends BaseMapper {
       throw new Error(`unsupported comparator in the expression >> ${path}`);
     }
 
-    result = compareFunction(firstValue, secondValue);
+    comparisonResult = compareFunction(firstValue, secondValue);
 
-    if (result) {
+    if (comparisonResult) {
       return returnValue;
     }
+
+    return null;
   }
 
   _getComparator(path) {
