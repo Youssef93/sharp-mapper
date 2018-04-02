@@ -430,6 +430,51 @@ Output:
  - The ***"this"*** keyword: it's similar to a pointer which points to the path at which the mapper is looking. For example if the mapper is mapping from:  "array1[0].object.array2[1]" & you specify the "this" keyword, it'll try to map the data from the last item in the current path (i.e "array2[1]") and whenever a number is inserted after this it will make the mapper look at the upper level by the same amount. **EX:** "@this1" will map from "object" while "@this2" will map from "array1[0]" & so on.
 
 
+**You can construct an array from non-array data**
+
+Data:
+
+```json
+{
+  "clientName": "Sharp",
+  "clientAge": 15,
+  "clientStreetAddress": "15 street 1",
+  "clientStreetName": "Rue de avenue",
+  "childFirstName": "Joe",
+  "childMiddleName": "Heat",
+  "childLastName": "Marg",
+  "vehicle_id_1": "a",
+  "vehicle_id_2": "b",
+  "vehicle_id_3": "c",
+  "vehicle_id_4": "d",
+  "vehicle_id_5": null
+}
+```
+
+
+
+Schema:
+
+```json
+{
+  "client": {
+    "name": "@clientName",
+    "age": "@clientAge",
+    "address": {
+      "streetNumber": "@clientStreetAddress",
+      "streetName": "@clientStreetName"
+    },
+
+    "vehicles": [{
+      "$$repeat$$": ["@vehicle_id_1", "@vehicle_id_2", "@vehicle_id_3", "@vehicle_id_4", "@vehicle_id_5"]
+    }]
+  }
+}
+
+```
+
+
+
 ----------
 ## **Value Mapping (Enum Mapping):**
 
