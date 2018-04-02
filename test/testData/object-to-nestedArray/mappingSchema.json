@@ -1,0 +1,47 @@
+{
+  "client": {
+    "name": "@clientName",
+    "age": "@clientAge",
+    "address": {
+      "streetNumber": "@clientStreetAddress",
+      "streetName": "@clientStreetName"
+    },
+
+    "childName": "Mr. $concat @childFirstName $concat $with '' @childMiddleName $concat $with '-' @childLastName",
+    "anotherFormName": "Mr. $concat @childFirstName $concat @childLastName $concat @childMiddleName",
+    "vehicles": [{
+      "$$repeat$$": [
+        {
+          "id": "@vehicle_id_1",
+          "drivers": [{
+            "$$repeat$$": [ "@driver_id_1"]
+          }]
+        },
+        {
+          "id": "@vehicle_id_2",
+          "drivers": [ {
+            "$$repeat$$": [ "@driver_id_2"]
+          }]
+        },
+        {
+          "id": "@vehicle_id_3",
+          "drivers": [ {
+            "$$repeat$$": [ "@driver_id_3"]
+          }]
+        },
+        {
+          "id": "@vehicle_id_4",
+          "drivers": [ {
+            "$$repeat$$": [ "@driver_id_4"]
+          }]
+        },
+        {
+          "id": "@vehicle_id_5",
+          "drivers": [ {
+            "$$repeat$$": [ { "id": "@driver_id_5" }]
+          }]
+        }
+      ]
+    }]
+  }
+}

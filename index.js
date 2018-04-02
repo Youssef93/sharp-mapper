@@ -2,11 +2,9 @@
 
 const _ = require('lodash');
 const config = require('./config');
-const schemaMapper = require('./src/structure-map/SchemaMapper');
-const arrayMapper = require('./src/structure-map/ArrayMapper');
-const valueMapper = require('./src/value-map/ValueMapper');
-const SchemaMapper = new schemaMapper(config);
-const ArrayMapper = new arrayMapper(config);
+const ValueMapper = require('./src/value-map/ValueMapper');
+const Mapper = require('./src/structure-map/Mapper');
+const mapper = new Mapper(config);
 
 const removeUndefinedValues = function(object) {
   return JSON.parse(JSON.stringify(object));
@@ -20,68 +18,13 @@ const format = function(mappedObject, removeUndefinedFlag) {
   return mappedObject;
 };
 
-const getArrayPaths = function(data, schema, key, currentPath) {
-  const { arrayIdentifier } = config;
-  const identifierValue = schema[key][0][arrayIdentifier];
-
-  if(_.isNil(identifierValue)) {
-    throw new Error ('missing array identifier');
-  }
-
-  const { mapper } = _.find(config.arrayMappingTypes, (mType) => {
-    return identifierValue.match(mType.regex);
-  });
-
-  return ArrayMapper[mapper](data, currentPath, identifierValue);
-};
-
-const getSubSchemaForArray = function(schema, schemaKey) {
-  const arrayMapping = _.get(schema, schemaKey);
-  const itemInsideArrayMapping = _.cloneDeep(_.head(arrayMapping));
-  _.unset(itemInsideArrayMapping, config.arrayIdentifier);
-  return itemInsideArrayMapping;
-}
-
-const _structureMap = function(data, schema, currentPath) {
-  currentPath = _.toString(currentPath);
-  const mappedObject = {};
-
-  _.forOwn(schema, (schemaValue, schemaKey) => {
-    const desiredOutput = _.cloneDeep(schemaValue);
-
-    if(_.isArray(desiredOutput)) {
-      const actualArrayPaths = getArrayPaths(data, schema, schemaKey, currentPath);
-      const mappedArray = _.map(actualArrayPaths, (path) => {
-        const subSchemaForArrayItem = getSubSchemaForArray(schema, schemaKey);
-        return _structureMap(data, subSchemaForArrayItem, path);
-      });
-
-      _.set(mappedObject, schemaKey, mappedArray);
-    }
-
-    else if(_.isObject(desiredOutput)) {
-      const subSchemaForObject = _.get(schema, schemaKey);
-      const subMappedObject = _structureMap(data, subSchemaForObject, currentPath);
-      _.set(mappedObject, schemaKey, subMappedObject);
-    }
-
-    else {
-      const mappedItem = SchemaMapper.mapBasedOnSchema(data, desiredOutput, currentPath);
-      _.set(mappedObject, schemaKey, mappedItem);
-    }
-  });
-
-  return mappedObject;
-};
-
 const structureMap = function(data, schema, removeUndefinedFlag) {
-  const mappedObject = _structureMap(data, schema, '');
-  
+  const mappedObject = mapper.map(data, schema, '');
   return format(mappedObject, removeUndefinedFlag);
 };
 
 const valueMap = function(objectToMap, schema, removeUndefinedFlag) {
-  const ValueMapper = new valueMapper(config, schema);
+  const valueMapper = new ValueMapper(config, schema);
 
   const mappedObject = {};
 
@@ -97,7 +40,7 @@ const valueMap = function(objectToMap, schema, removeUndefinedFlag) {
 
     else if(_.isDate(valueToMap)) {
       valueToMap = JSON.stringify(valueToMap);
-      const mappedData = ValueMapper.mapValue(valueToMap, key);
+      const mappedData = valueMapper.mapValue(valueToMap, key);
       _.merge(mappedObject, mappedData);
     }
 
@@ -108,7 +51,7 @@ const valueMap = function(objectToMap, schema, removeUndefinedFlag) {
     }
 
     else {
-      const mappedData = ValueMapper.mapValue(valueToMap, key);
+      const mappedData = valueMapper.mapValue(valueToMap, key);
       _.merge(mappedObject, mappedData);
     }
   });

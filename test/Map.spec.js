@@ -123,6 +123,28 @@ describe('MapService', () => {
       const mappedObjectWithUndefinedRemoved = MapService.structureMap(data, mappingSchema, true);
       expect(mappedObjectWithUndefinedRemoved).to.deep.equal(validation);
     });
+
+    it('should test object to array mapping', () => {
+      const data = require('./testData/object-to-array/data');
+      const mappingSchema = require('./testData/object-to-array/mappingSchema');
+      const validation = require('./testData/object-to-array/validation');
+      const mappedObject = MapService.structureMap(data, mappingSchema);
+      expect(mappedObject).to.deep.equal(validation);
+
+      const mappedObjectWithUndefinedRemoved = MapService.structureMap(data, mappingSchema, true);
+      expect(mappedObjectWithUndefinedRemoved).to.deep.equal(validation)
+    });
+
+    it('should test object to nested array mapping', () => {
+      const data = require('./testData/object-to-nestedArray/data');
+      const mappingSchema = require('./testData/object-to-nestedArray/mappingSchema');
+      const validation = require('./testData/object-to-nestedArray/validation');
+      const mappedObject = MapService.structureMap(data, mappingSchema);
+      expect(mappedObject).to.deep.equal(validation);
+
+      const mappedObjectWithUndefinedRemoved = MapService.structureMap(data, mappingSchema, true);
+      expect(mappedObjectWithUndefinedRemoved).to.deep.equal(validation)
+    });
   });
 
   describe('valueMap', () => {
