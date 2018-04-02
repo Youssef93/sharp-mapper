@@ -39,7 +39,7 @@ module.exports = {
 
   arrayMappingTypes: [{
     regex: /^[\)\(@a-z\[\]A-Z0-9.\/\-_]* *(\$\$and [\)\(@a-z\[\]A-Z0-9.\/\-_]*)*/g,
-    mapper: '_getPaths'
+    mapper: 'getPaths'
   }],
 
   conditionRegexs: {

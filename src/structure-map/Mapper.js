@@ -147,6 +147,21 @@ class Mapper {
     return _.trim(finalStr);
   }
 
+  getPaths(data, currentPath, repeatValue) {
+    currentPath = _.toString(currentPath);
+
+    let valuesToRepeatMappingOn = repeatValue.split(this.config.arrayToArraySplitter);
+    valuesToRepeatMappingOn = _.map(valuesToRepeatMappingOn, (item) => _.trim(item));
+    let allPaths = [];
+
+    _.forEach(valuesToRepeatMappingOn, (path) => {
+      const actualPaths = this._changeWrittenPathToActualPaths(data, path, currentPath);
+      allPaths = _.concat(allPaths, actualPaths);
+    });
+
+    return allPaths;
+  }
+
   _prepareForConcatenation(item) {
     item = _.trim(item);
 
@@ -213,21 +228,6 @@ class Mapper {
     return _.map(actualArrayPaths, (path) => {
       return this.map(data, subSchemaForArrayItem, path);
     });
-  }
-
-  _getPaths(data, currentPath, repeatValue) {
-    currentPath = _.toString(currentPath);
-
-    let valuesToRepeatMappingOn = repeatValue.split(this.config.arrayToArraySplitter);
-    valuesToRepeatMappingOn = _.map(valuesToRepeatMappingOn, (item) => _.trim(item));
-    let allPaths = [];
-
-    _.forEach(valuesToRepeatMappingOn, (path) => {
-      const actualPaths = this._changeWrittenPathToActualPaths(data, path, currentPath);
-      allPaths = _.concat(allPaths, actualPaths);
-    });
-
-    return allPaths;
   }
 
   _changeWrittenPathToActualPaths(data, writtenPath, currentPath) {
