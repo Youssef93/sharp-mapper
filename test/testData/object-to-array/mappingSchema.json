@@ -1,0 +1,16 @@
+{
+  "client": {
+    "name": "@clientName",
+    "age": "@clientAge",
+    "address": {
+      "streetNumber": "@clientStreetAddress",
+      "streetName": "@clientStreetName"
+    },
+
+    "childName": "Mr. $concat @childFirstName $concat $with '' @childMiddleName $concat $with '-' @childLastName",
+    "anotherFormName": "Mr. $concat @childFirstName $concat @childLastName $concat @childMiddleName",
+    "vehicles": [{
+      "$$repeat$$": ["@vehicle_id_1", "@vehicle_id_2", "@vehicle_id_3", "@vehicle_id_4", "@vehicle_id_5"]
+    }]
+  }
+}

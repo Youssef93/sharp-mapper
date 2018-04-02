@@ -8,7 +8,57 @@ class ArrayMapper extends SchemaMapper {
     super(config);
   }
 
-  getPaths(data, currentPath, repeatValue) {
+  mapArray({ data, schema, schemaKey, currentPath }, mainMapper) {
+    const { arrayIdentifier } = this.config;
+    const repeatValue = _.get(schema[schemaKey][0], arrayIdentifier);
+    
+    if(_.isNil(repeatValue)) {
+      throw new Error (`missing array identifier is ${JSON.stringify(schema[schemaKey])}`);
+    }
+
+    let mappedArray;
+
+    // not an object & not an array
+    if(!_.isObject(repeatValue)) {
+      mappedArray = this._mapBasedOnArrayNames({ data, schema, schemaKey, currentPath, repeatValue }, mainMapper);
+    }
+
+    else if (!_.isArray(repeatValue)) {
+      throw new Error (`cannot have an object in the ${arrayIdentifier} value`);
+    }
+
+    else {
+      mappedArray = this._constructArrayFromData({ data, currentPath, repeatValue }, mainMapper);
+    }
+
+    return mappedArray;
+  }
+
+  _constructArrayFromData({ data, currentPath, repeatValue }, mainMapper) {
+    return _.map(repeatValue, (valueToPush) => {
+      if(_.isObject(valueToPush)) {
+        return mainMapper.map(data, valueToPush, currentPath);
+      }
+
+      else {
+        return this.mapBasedOnSchema(data, valueToPush, currentPath);
+      }
+    });
+  }
+
+  _mapBasedOnArrayNames({ data, schema, schemaKey, currentPath, repeatValue }, mainMapper) {
+    const { mapper } = _.find(this.config.arrayMappingTypes, (mType) => {
+      return repeatValue.match(mType.regex);
+    });
+  
+    const actualArrayPaths = this[mapper](data, currentPath, repeatValue);
+    const subSchemaForArrayItem = this._getSubSchemaForArray(schema, schemaKey);
+    return _.map(actualArrayPaths, (path) => {
+      return mainMapper.map(data, subSchemaForArrayItem, path);
+    });
+  }
+
+  _getPaths(data, currentPath, repeatValue) {
     currentPath = _.toString(currentPath);
 
     let valuesToRepeatMappingOn = repeatValue.split(this.config.arrayToArraySplitter);
@@ -90,6 +140,13 @@ class ArrayMapper extends SchemaMapper {
     }
 
     return _.map(dataToGet, (item, index) => pathName + '[' + index + ']');
+  }
+
+  _getSubSchemaForArray (schema, schemaKey) {
+    const arrayMapping = _.get(schema, schemaKey);
+    const itemInsideArrayMapping = _.cloneDeep(_.head(arrayMapping));
+    _.unset(itemInsideArrayMapping, this.config.arrayIdentifier);
+    return itemInsideArrayMapping;
   }
 };
 
