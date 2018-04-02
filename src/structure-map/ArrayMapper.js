@@ -1,9 +1,9 @@
 'use strict';
 
 const _ = require('lodash');
-const BaseMapper = require('./BaseMapper');
+const SchemaMapper = require('./SchemaMapper');
 
-class ArrayMapper extends BaseMapper {
+class ArrayMapper extends SchemaMapper {
   constructor(config) {
     super(config);
   }
