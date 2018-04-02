@@ -451,8 +451,6 @@ Data:
 }
 ```
 
-
-
 Schema:
 
 ```json
@@ -468,6 +466,24 @@ Schema:
     "vehicles": [{
       "$$repeat$$": ["@vehicle_id_1", "@vehicle_id_2", "@vehicle_id_3", "@vehicle_id_4", "@vehicle_id_5"]
     }]
+  }
+}
+
+```
+
+Output:
+
+```json
+{
+  "client": {
+    "name": "Sharp",
+    "age": 15,
+    "address": {
+      "streetNumber": "15 street 1",
+      "streetName": "Rue de avenue"
+    },
+    
+    "vehicles": ["a", "b", "c", "d", null]
   }
 }
 
