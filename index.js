@@ -2,9 +2,8 @@
 
 const _ = require('lodash');
 const config = require('./config');
-const ValueMapper = require('./src/value-map/ValueMapper');
-const Mapper = require('./src/structure-map/Mapper');
-const mapper = new Mapper(config);
+const ValueMapper = require('./src/ValueMapper');
+const StructureMapper = require('./src/StructureMapper');
 
 const removeUndefinedValues = function(object) {
   return JSON.parse(JSON.stringify(object));
@@ -19,7 +18,8 @@ const format = function(mappedObject, removeUndefinedFlag) {
 };
 
 const structureMap = function(data, schema, removeUndefinedFlag) {
-  const mappedObject = mapper.map(data, schema, '');
+  const structureMapper = new StructureMapper(config);
+  const mappedObject = structureMapper.map(data, schema, '');
   return format(mappedObject, removeUndefinedFlag);
 };
 

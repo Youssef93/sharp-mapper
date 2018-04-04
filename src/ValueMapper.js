@@ -10,7 +10,7 @@ class ValueMapper {
 
   mapValue(valueToMap, keyInMainObject) {
     if(_.isObject(valueToMap)) {
-      throw new Error('Cannot have an object in the value mapping schema');
+      throw new Error(`Cannot have an object in the value mapping schema at ${keyInMainObject}`);
     }
 
     if(this._isFoundInSchema(keyInMainObject)) {
