@@ -133,9 +133,10 @@ class Mapper {
   concat(data, path, currentPath) {
     const valuesToConcat = _.split(path, this.config.concatination.splitter);
 
-    const concatParts = _.map(valuesToConcat, (valueToCalculate) => {
+    let concatParts = _.map(valuesToConcat, (valueToCalculate) => {
       const concatenationData = this._prepareForConcatenation(valueToCalculate);
-      concatenationData.concatValue = this._mapBasedOnSchema(data, concatenationData.itemToCalculate, currentPath);
+      concatenationData.concatValue = 
+        this._mapBasedOnSchema(data, concatenationData.itemToCalculate, currentPath) || "";
       return concatenationData;
     });
 
