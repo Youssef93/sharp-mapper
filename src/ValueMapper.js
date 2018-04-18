@@ -11,30 +11,30 @@ class ValueMapper {
     const mappedObject = {};
 
     _.forOwn(objectToMap, (valueToMap, key) => {
-      if(_.isArray(valueToMap)) {
-        const mappedArray = _.map(valueToMap, (arrayItem) => {
-          const schemaForArrayItem = _.head(_.get(schema, key));
-          return this.map(arrayItem, schemaForArrayItem);
-        });
-  
-        _.set(mappedObject, key, mappedArray);
+      if(this._isFoundInSchema(key, schema)) {
+        if(_.isArray(valueToMap)) {
+          const mappedArray = _.map(valueToMap, (arrayItem) => {
+            const schemaForArrayItem = _.head(_.get(schema, key));
+            return this.map(arrayItem, schemaForArrayItem);
+          });
+    
+          _.set(mappedObject, key, mappedArray);
+        }
+    
+        else if(_.isObject(valueToMap)) {
+          const subSchemaForObject = _.get(schema, key);
+          const mappedSubObject = this.map(valueToMap, subSchemaForObject);
+          _.set(mappedObject, key, mappedSubObject);
+        }
+    
+        else {
+          const mappedData = this._mapValue(valueToMap, key, schema);
+          _.merge(mappedObject, mappedData);
+        }
       }
-  
-      else if(_.isDate(valueToMap)) {
-        valueToMap = JSON.stringify(valueToMap);
-        const mappedData = this._mapValue(valueToMap, key, schema);
-        _.merge(mappedObject, mappedData);
-      }
-  
-      else if(_.isObject(valueToMap)) {
-        const subSchemaForObject = _.get(schema, key);
-        const mappedSubObject = this.map(valueToMap, subSchemaForObject);
-        _.set(mappedObject, key, mappedSubObject);
-      }
-  
+
       else {
-        const mappedData = this._mapValue(valueToMap, key, schema);
-        _.merge(mappedObject, mappedData);
+        mappedObject[key] = valueToMap;
       }
     });
 

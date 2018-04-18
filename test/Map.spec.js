@@ -165,7 +165,7 @@ describe('MapService', () => {
       const validation = require('./testData/value-mapping-with-dates/validation');
       const mappedObject = MapService.valueMap(data, mappingSchema);
       const { expiryDate } = mappedObject;
-      const date = Date.parse(JSON.parse(expiryDate));
+      const date = _.cloneDeep(expiryDate);
       expect(_.isNaN(date)).to.be.false;
       _.unset(mappedObject, 'expiryDate');
       expect(mappedObject).to.deep.equal(validation);
