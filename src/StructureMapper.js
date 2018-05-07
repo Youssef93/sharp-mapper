@@ -181,6 +181,24 @@ class Mapper {
     return concatenationData;
   }
 
+  _getRepeatType(repeatValue) {
+    let type;
+
+    if(!_.isObject(repeatValue)) {
+      type = '_mapBasedOnArrayNames';
+    }
+
+    else if (!_.isArray(repeatValue)) {
+      type = '_toPrimitiveValues';
+    }
+
+    else {
+      type = '_constructArrayFromData';
+    }
+
+    return type;
+  }
+
   _mapArray({ data, schema, schemaKey, currentPath }) {
     const { arrayIdentifier } = this.config;
     const repeatValue = _.get(schema[schemaKey][0], arrayIdentifier);
@@ -190,21 +208,46 @@ class Mapper {
     }
 
     let mappedArray;
-
-    // not an object & not an array
-    if(!_.isObject(repeatValue)) {
-      mappedArray = this._mapBasedOnArrayNames({ data, schema, schemaKey, currentPath, repeatValue });
-    }
-
-    else if (!_.isArray(repeatValue)) {
-      throw new Error (`cannot have an object in the ${arrayIdentifier} value`);
-    }
-
-    else {
-      mappedArray = this._constructArrayFromData({ data, currentPath, repeatValue });
-    }
+    
+    const repeatValueType = this._getRepeatType(repeatValue);
+    mappedArray = this[repeatValueType]({ data, schema, schemaKey, currentPath, repeatValue });
 
     return mappedArray;
+  }
+
+  _prepareSchemaForPrimitiveValues(schema, schemaKey, keyToFetch) {
+    const subSchemaForArrayItem = this._getSubSchemaForArray(schema, schemaKey);
+    subSchemaForArrayItem[keyToFetch] = this.config.defaultStructurePointer + '.' + keyToFetch;
+    return subSchemaForArrayItem;
+  }
+
+  _toPrimitiveValues({ data, schema, schemaKey, currentPath, repeatValue }) {
+    const { identifierKeyword, arrayNamesKeyword } = this.config.arrayToPrimitiveValues;
+
+    if(!_.has(repeatValue, identifierKeyword)) {
+      throw new Error (`missing the value to pick in ${JSON.stringify(repeatValue)}`);
+    }
+
+    if(!_.has(repeatValue, arrayNamesKeyword)) {
+      throw new Error (`missing the array to map in ${JSON.stringify(repeatValue)}`);      
+    }
+
+    const arrayNames = _.get(repeatValue, arrayNamesKeyword);
+    const keyToFetch = _.get(repeatValue, identifierKeyword);
+
+    const { mapper } = _.find(this.config.arrayMappingTypes, (mType) => {
+      return arrayNames.match(mType.regex);
+    });
+
+    const actualArrayPaths = this[mapper](data, currentPath, arrayNames);
+    const subSchemaForArrayItem = this._prepareSchemaForPrimitiveValues(schema, schemaKey, keyToFetch);
+    const mappedArrayWithKey =  _.map(actualArrayPaths, (path) => {
+      return this.map(data, subSchemaForArrayItem, path);
+    });
+
+    return _.map(mappedArrayWithKey, (item) => {
+      return item[keyToFetch];
+    });
   }
 
   _constructArrayFromData({ data, currentPath, repeatValue }) {

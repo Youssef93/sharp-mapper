@@ -145,6 +145,17 @@ describe('MapService', () => {
       const mappedObjectWithUndefinedRemoved = MapService.structureMap(data, mappingSchema, true);
       expect(mappedObjectWithUndefinedRemoved).to.deep.equal(validation)
     });
+
+    it('should test array of objects to array of primitive values mapping', () => {
+      const data = require('./testData/array-of-objects-to-array-of-primitive/data');
+      const mappingSchema = require('./testData/array-of-objects-to-array-of-primitive/mappingSchema');
+      const validation = require('./testData/array-of-objects-to-array-of-primitive/validation');
+      const mappedObject = MapService.structureMap(data, mappingSchema);
+      expect(mappedObject).to.deep.equal(validation);
+
+      const mappedObjectWithUndefinedRemoved = MapService.structureMap(data, mappingSchema, true);
+      expect(mappedObjectWithUndefinedRemoved).to.deep.equal(validation)
+    });
   });
 
   describe('valueMap', () => {

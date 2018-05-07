@@ -13,7 +13,12 @@
           "id": "d1id2",
           "name": "Test2"
         }
-      ]
+      ],
+      "locations": [{
+        "id": "1"
+      }, {
+        "id": "2"
+      }]
     }, {
       "id": "2",
       "model": "BMW",
@@ -26,7 +31,12 @@
           "id": "d2id2",
           "name": "Test22"
         }
-      ]
+      ],
+      "locations": [{
+        "id": "3"
+      }, {
+        "id": "4"
+      }]
     }
   ],
 
@@ -43,7 +53,12 @@
           "id": "dtest2",
           "name": "Test2"
         }
-      ]
+      ],
+      "locations": [{
+        "id": "5"
+      }, {
+        "id": "6"
+      }]
     }
   ]
 }

@@ -11,6 +11,12 @@
         "$$repeat$$": "@this.drivers",
         "id": "@this.id",
         "parentID": "@this1.id"
+      }],
+      "ids": [{
+        "$$repeat$$": {
+          "pick":"id",
+          "arrays": "@this.drivers $$and @this.locations"
+        }
       }]
     }
   }]

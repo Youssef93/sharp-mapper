@@ -491,6 +491,197 @@ Output:
 
 
 
+### Repeat Values:
+
+The `$$repeat$$` in an array mapping can have one of 3 types:
+
+- **String:** where the value found in the `$$repeat$$` is a string of arrays to execute the mapping on.
+
+  **Ex:**
+
+  Data:
+
+  ```json
+  {
+      "cars": [{
+          "name": "c1",
+          "modelYear": "1990"
+      }, {
+          "name": "c2",
+          "modelYear": "2000"
+      }]
+  }
+  ```
+
+  Schema:
+
+  ```json
+  {
+      "cars": [{
+          "$$repeat$$": "@cars",
+          "title": "@this.name",
+          year: "@this.modelYear"
+      }]
+  }
+  ```
+
+  Output:
+
+  ```json
+  {
+      "cars": [{
+          "title": "c1",
+          "year": "1990"
+      }, {
+          "title": "c2",
+          "year": "2000"
+      }]
+  }
+  ```
+
+- **Array:** to construct an array from non-array values
+
+  **Ex:**
+
+  Data:
+
+  ```json
+  {
+    "vehicle_id_1": "a",
+    "vehicle_id_2": "b",
+    "vehicle_id_3": "c",
+    "vehicle_id_4": "d",
+    "vehicle_id_5": null
+  }
+  ```
+
+  Schema:
+
+  ```json
+  {
+          "vehicles": [{
+        "$$repeat$$": ["@vehicle_id_1", "@vehicle_id_2", "@vehicle_id_3", "@vehicle_id_4", "@vehicle_id_5"]
+      }]
+  }
+  ```
+
+  Output:
+
+  ```json
+  {
+      "vehicles": ["a", "b", "c", "d", null]
+  }
+  ```
+
+  
+
+  **OR**
+
+  
+
+  Data:
+
+  ```json
+  {
+    "vehicle_id_1": "a",
+    "vehicle_id_2": "b",
+    "vehicle_id_3": "c",
+    "vehicle_id_4": "d",
+    "vehicle_id_5": null,
+  }
+  ```
+
+  Schema: 
+
+  ```json
+  {
+      "vehicles": [{
+        "$$repeat$$": [
+          {
+            "id": "@vehicle_id_1"
+          },
+          {
+            "id": "@vehicle_id_2"
+          },
+          {
+            "id": "@vehicle_id_3"
+          },
+          {
+            "id": "@vehicle_id_4"
+          },
+          {
+            "id": "@vehicle_id_5"
+          }
+        ]
+      }]
+  }
+  ```
+
+  Output:
+
+  ```json
+  {
+      "vehicles": [
+        {
+          "id": "a"
+        },
+        {
+          "id": "b"
+        },
+        {
+          "id": "c"
+        },
+        {
+          "id": "d"
+        },
+        {
+          "id": null
+        }
+      ]
+  }
+  ```
+
+- **Object:** to map an array of object to array of primitive values.
+
+  **Ex:**
+
+  Data:
+
+  ```json
+  {
+    "phones": [{
+      "number": "+20137462",
+      "id": "1"
+    }, {
+      "number": "+3463662",
+      "id": "2"
+    }]
+  }
+  ```
+
+  Schema:
+
+  ```json
+  {
+    "phones": [{
+      "$$repeat$$": { 
+        "arrays": "@phones",
+        "pick": "number"
+      }
+    }]
+  }
+  ```
+
+  Output:
+
+  ```json
+  {
+    "phones": ["+20137462", "+3463662"]
+  }
+  ```
+
+  
+
 ----------
 ## **Value Mapping (Enum Mapping):**
 

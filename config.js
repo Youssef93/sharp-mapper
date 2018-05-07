@@ -21,6 +21,7 @@ module.exports = {
   arrayIdentifier: "$$repeat$$",
   arrayToArraySplitter: '$$and',
   pointerRegex: /\@this[0-9]*/g,
+  defaultStructurePointer: '@this',
 
   dates: {
     head: '$date',
@@ -30,6 +31,11 @@ module.exports = {
   concatination: {
     splitter: '$concat',
     customConcat: '$with'
+  },
+
+  arrayToPrimitiveValues: {
+    identifierKeyword: 'pick',
+    arrayNamesKeyword: 'arrays'
   },
 
   valueMapping: {
