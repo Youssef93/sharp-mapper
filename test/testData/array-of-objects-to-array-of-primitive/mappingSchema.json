@@ -1,0 +1,8 @@
+{
+  "phones": [{
+    "$$repeat$$": { 
+      "arrays": "@phones",
+      "pick": "number"
+    }
+  }]
+}
