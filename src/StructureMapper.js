@@ -142,7 +142,10 @@ class Mapper {
 
     let finalStr = '';
     _.forEach(concatParts, (concatData) => {
-      finalStr += concatData.joiner + concatData.concatValue;
+      if(!_.isEmpty(concatData.concatValue)) {
+        const starterString = _.isEmpty(finalStr) ? '' : concatData.joiner;
+        finalStr += starterString + concatData.concatValue;        
+      }
     });
 
     return _.trim(finalStr);

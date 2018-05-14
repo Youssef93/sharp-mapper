@@ -9,7 +9,9 @@
 
     "childName": "Mr. JoeHeat-Marg",
     "anotherFormName": "Mr. Joe Marg Heat",
-    "thirdNameFormat": "--",
-    "fourthNameFormat": ""
+    "thirdNameFormat": "",
+    "fourthNameFormat": "",
+    "fifthNameFormat": "Joe",
+    "sixthNameFormat": "Joe Marg"
   }
 }
