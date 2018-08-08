@@ -98,7 +98,7 @@ class Mapper {
     const dateValue = this._mapBasedOnSchema(data, dateObjectToCalculate, currentPath);
 
     if (_.isNil(dateValue))
-      return null;
+      return undefined;
 
     return moment(dateValue).format(dateFormat);
   }
