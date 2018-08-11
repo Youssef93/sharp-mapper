@@ -156,6 +156,13 @@ describe('MapService', () => {
       const mappedObjectWithUndefinedRemoved = MapService.structureMap(data, mappingSchema, true);
       expect(mappedObjectWithUndefinedRemoved).to.deep.equal(validation)
     });
+
+    it('should test array to array maping if not object found', () => {
+      const data = {};
+      const mappingSchema = require('./testData/array-to-array/mappingSchema');
+      const mappedObjectWithUndefinedRemoved = MapService.structureMap(data, mappingSchema, true);
+      expect(mappedObjectWithUndefinedRemoved).to.deep.equal({"vehicles": []});
+    });
   });
 
   describe('valueMap', () => {

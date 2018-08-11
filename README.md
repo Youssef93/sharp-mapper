@@ -331,44 +331,40 @@ Data:
 
 ```json
 {
-  "vehicles": [{
-    "id": "1",
-    "model": "Jaguar",
-    "year": 2000,
-    "objectID": "77",
-    "newValue": 2,
-    "drivers": [{
-      "id": "d1id1",
-      "parentID": "1"
+  "vehicles": [
+    {
+      "id": "1",
+      "name": "vehicle1",
+      "claims": [
+        {
+          "id": "a",
+          "name": "c11"
+        }, {
+          "id": "b",
+          "name": "c12"
+        }
+      ]
     }, {
-      "id": "d1id2",
-      "parentID": "1"
-    }]
-  }, {
-    "id": "2",
-    "model": "BMW",
-    "year": 2012,
-    "objectID": "77",
-    "newValue": 2,
-    "drivers": [{
-      "id": "d2id1",
-      "parentID": "2"
-    }, {
-      "id": "d2id2",
-      "parentID": "2"
-    }]
-  }, {
-    "id": "13",
-    "model": "Harvey",
-    "year": 2003,
-    "objectID": "77",
-    "newValue": 2,
-    "drivers": [{
-      "id": "dtest1",
-      "parentID": "13"
-    }, {
-      "id": "dtest2",
-      "parentID": "13"
+      "id": "2",
+      "name": "vehicle2",
+      "claims": [
+        {
+          "id": "c",
+          "name": "c21"
+        }, {
+          "id": "d",
+          "name": "c22"
+        }
+      ]
+    }
+  ],
+
+  "motorcycles": [{
+    "id": "3",
+    "name": "motorcycle1",
+    "claims": [{
+      "id": "e",
+      "name": "c31"
     }]
   }]
 }

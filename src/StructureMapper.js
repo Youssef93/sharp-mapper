@@ -280,7 +280,15 @@ class Mapper {
   _changeWrittenPathToActualPaths(data, writtenPath, currentPath) {
     let subPathsList = this._splitBasedOnPath(writtenPath);
     const headSubPath = _.head(subPathsList);
-    let extractedPaths = this._repeatPathBasedOnArrayLength(headSubPath, data, currentPath);
+
+    let extractedPaths;
+
+    try {
+      extractedPaths = this._repeatPathBasedOnArrayLength(headSubPath, data, currentPath);
+    }
+    catch(e) {
+      return [];
+    }
 
     subPathsList = _.tail(subPathsList);
     while(! _.isEmpty(subPathsList)) {
