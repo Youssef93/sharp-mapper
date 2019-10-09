@@ -75,7 +75,7 @@ class ValueMapper {
       } 
       
       else {
-        mappedItem = this._loadDefault(enumCases);
+        mappedItem = this._loadDefault(enumCases, valueToMap);
       }
 
       _.set(mappedObject, schemaKey, mappedItem);
@@ -88,8 +88,14 @@ class ValueMapper {
     return _.has(schema, keyInMainObject);
   }
 
-  _loadDefault(schemaValue) {
-    return _.get(schemaValue, this.config.valueMapping.defaultKeyword);
+  _loadDefault(schemaValue, originalValue) {
+    const defaultValue = _.get(schemaValue, this.config.valueMapping.defaultKeyword);
+
+    if(defaultValue === this.config.valueMapping.sameKeyword) {
+      return originalValue;
+    }
+
+    return defaultValue;
   }
 
   _replacePointerKeyword(schema, keyInMainObject) {

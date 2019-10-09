@@ -1,7 +1,7 @@
 {
-  "homeType": "house",
+  "homeType": "TownHouse",
   "mainId": "2",
-  "isHouse": true,
+  "isHouse": null,
   "vehicles": [{
     "id": "1",
     "vehicleType": "other",

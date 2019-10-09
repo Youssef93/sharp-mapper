@@ -3,7 +3,7 @@
     "this": {
       "home": "house",
       "condo": "condoHouse",
-      "$default": "other"
+      "$default": "$same$"
     },
 
     "isHouse": {

@@ -40,7 +40,8 @@ module.exports = {
 
   valueMapping: {
     pointer: "this",
-    defaultKeyword: "$default"
+    defaultKeyword: "$default",
+    sameKeyword: "$same$"
   },
 
   arrayMappingTypes: [{

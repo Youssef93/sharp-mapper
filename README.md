@@ -1,6 +1,14 @@
-A Node module that maps Javascript objects from one form to the other.
 
-## **Structure Mapping:**
+A Node module that maps Javascript objects from one form to the other using only JSON schema.
+
+The two main functions are:
+- [Structure Mapping](#structure-mapping)
+  - [Repeat Values:](#repeat-values)
+- [**Value Mapping (Enum Mapping):**](#value-mapping-enum-mapping)
+  - [**Features:**](#features)
+- [Removing Undefined Values](#removing-undefined-values)
+
+## Structure Mapping
 
 ```javascript
 var sharpMapper = require('sharp-mapper');
@@ -26,7 +34,6 @@ Data:
  "childLastName": "Marg"
 }
 ```
-
 Schema:
 
 ```json
@@ -797,16 +804,39 @@ Output:
 
  - Objects and arrays are listed as their corresponding structure in the main object
  - If a certain attribute wasn't mentioned in the schema, it will be returned as it is (i.e. no mapping occurs)
+- Using the `$same$` keyword along with the `$default`. This is in case you have an if/if/else case
 
-
-
+Example:
+```json
+{
+  "attribute": "a"
+}
+```
+Schema:
+```json
+{
+  "attribute": {
+      "this": {
+          "b": "1",
+          "c": "2",
+          "$default": "$same$"
+       }
+   }
+}
+```
+Output:
+```json
+{
+  "attribute": "a"
+}
+```
 **A combined test case:**
 
 Data:
 
 ```json
 {
-  "homeType": "home",
+  "homeType": "TownHouse",
   "mainId": "2",
   "vehicles": [{
     "id": "1",
@@ -854,7 +884,7 @@ Schema:
     "this": {
       "home": "house",
       "condo": "condoHouse",
-      "$default": "other"
+      "$default": "$same$"
     },
 
     "isHouse": {
@@ -916,9 +946,9 @@ Output:
 
 ```json
 {
-  "homeType": "house",
+  "homeType": "TownHouse",
   "mainId": "2",
-  "isHouse": true,
+  "isHouse": null,
   "vehicles": [{
     "id": "1",
     "vehicleType": "other",
