@@ -29,4 +29,18 @@ const valueMap = function(objectToMap, schema, removeUndefinedFlag) {
   return format(mappedObject, removeUndefinedFlag);
 };
 
-module.exports = { structureMap, valueMap };
+const  translatePaths = function(data, writtenPaths) {
+  if(!Array.isArray(writtenPaths)) throw new Error('Second argument in the translatePaths function must be an array');
+
+  const structureMapper = new StructureMapper(config);
+  let result = [];
+
+  _.forEach(writtenPaths, (path) => {
+    const actualPaths = structureMapper.changeWrittenPathToActualPaths(data, path);
+    result = result.concat(actualPaths);
+  });
+
+  return result;
+}
+
+module.exports = { structureMap, valueMap, translatePaths };

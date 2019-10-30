@@ -193,4 +193,47 @@ describe('MapService', () => {
       expect(mappedObjectWithUndefinedRemoved).to.deep.equal(validation);
     });
   });
+
+  describe('translate', () => {
+    it('should test array mapping tanslations', () => {
+      const data = require('./testData/array-to-array/data.json');
+      const paths = ['cars.drivers.name'];
+      const result = MapService.translatePaths(data, paths);
+      expect(result).to.deep.equal(['cars[0].drivers[0].name', 'cars[0].drivers[1].name', 'cars[1].drivers[0].name', 'cars[1].drivers[1].name']);
+    });
+
+    it('should test array mapping tanslations if parent is object not array', () => {
+      const data = require('./testData/array-to-array/data.json');
+      const paths = ['data.cars.drivers.name'];
+      const test = { data };
+      const result = MapService.translatePaths(test, paths);
+      expect(result).to.deep.equal(['data.cars[0].drivers[0].name', 'data.cars[0].drivers[1].name', 'data.cars[1].drivers[0].name', 'data.cars[1].drivers[1].name']);
+    });
+
+    it('should test array mapping tanslations if the last child is an array', () => {
+      const data = require('./testData/array-to-array/data.json');
+      const paths = ['cars.drivers'];
+      const result = MapService.translatePaths(data, paths);
+      expect(result).to.deep.equal(['cars[0].drivers[0]', 'cars[0].drivers[1]', 'cars[1].drivers[0]', 'cars[1].drivers[1]']);
+    });
+
+    it('should return empty array', () => {
+      const data = require('./testData/array-to-array/data.json');
+      const paths = ['cars.drivers.test'];
+      const result = MapService.translatePaths(data, paths);
+      expect(result).to.deep.equal([]);
+    });
+
+    it('should return multiple paths arrays & object inside array validation', () => {
+      const data = require('./testData/arrayNestedObjectNull-to-array/data.json');
+      const paths = ['vehicles.otherData.claims', 'motorcycles.otherData.claims'];
+      const result = MapService.translatePaths(data, paths);
+      expect(result).to.deep.equal(['vehicles[1].otherData.claims[0]', 'vehicles[1].otherData.claims[1]', 'motorcycles[0].otherData.claims[0]'])
+    });
+
+    it('should throw error', () => {
+      const fn = () => MapService.translatePaths({}, 'string');
+      expect(fn).to.throw(Error);
+    })
+  });
 });

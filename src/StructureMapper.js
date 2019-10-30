@@ -1,18 +1,18 @@
-'use strict';
+"use strict";
 
-const _ = require('lodash');
-const moment = require('moment');
+const _ = require("lodash");
+const moment = require("moment");
 
 const comparators = {
-  equal: function (firstValue, secondValue) {
+  equal: function(firstValue, secondValue) {
     return _.toString(firstValue) === _.toString(secondValue);
   },
 
-  notEqual: function (firstValue, secondValue) {
+  notEqual: function(firstValue, secondValue) {
     return _.toString(firstValue) !== _.toString(secondValue);
   },
 
-  greaterThan: function (firstValue, secondValue) {
+  greaterThan: function(firstValue, secondValue) {
     let result;
     firstValue = parseInt(firstValue);
     secondValue = parseInt(secondValue);
@@ -26,7 +26,7 @@ const comparators = {
     return result;
   },
 
-  lessThan: function (firstValue, secondValue) {
+  lessThan: function(firstValue, secondValue) {
     let result;
     firstValue = parseInt(firstValue);
     secondValue = parseInt(secondValue);
@@ -57,15 +57,11 @@ class Mapper {
       if (_.isArray(desiredOutput)) {
         const mappedArray = this._mapArray({ data, schema, schemaKey, currentPath });
         _.set(mappedObject, schemaKey, mappedArray);
-      } 
-      
-      else if (_.isObject(desiredOutput)) {
+      } else if (_.isObject(desiredOutput)) {
         const subSchemaForObject = _.get(schema, schemaKey);
         const subMappedObject = this.map(data, subSchemaForObject, currentPath);
         _.set(mappedObject, schemaKey, subMappedObject);
-      }
-      
-      else {
+      } else {
         const mappedItem = this._mapBasedOnSchema(data, desiredOutput, currentPath);
         _.set(mappedObject, schemaKey, mappedItem);
       }
@@ -86,10 +82,10 @@ class Mapper {
 
   date(data, path, currentPath) {
     const { dates } = this.config;
-    path = path.replace(dates.head, '');
+    path = path.replace(dates.head, "");
 
     let expressionParts = path.split(dates.formatter);
-    expressionParts = _.map(expressionParts, (exp) => _.trim(exp));
+    expressionParts = _.map(expressionParts, exp => _.trim(exp));
 
     const dateObjectToCalculate = _.head(expressionParts);
 
@@ -97,8 +93,7 @@ class Mapper {
 
     const dateValue = this._mapBasedOnSchema(data, dateObjectToCalculate, currentPath);
 
-    if (_.isNil(dateValue))
-      return undefined;
+    if (_.isNil(dateValue)) return undefined;
 
     return moment(dateValue).format(dateFormat);
   }
@@ -108,7 +103,7 @@ class Mapper {
     let result = null;
 
     // loop on cases (all if conditions written)
-    _.forEach(expParts, (caseExp) => {
+    _.forEach(expParts, caseExp => {
       const compResult = this._compare(data, caseExp, currentPath);
       if (compResult) {
         result = compResult;
@@ -120,7 +115,7 @@ class Mapper {
     if (result === null) {
       let otherwise = _.head(path.match(this.config.conditionRegexs.otherwiseReg));
       if (otherwise) {
-        otherwise = otherwise.split(' ')[2];
+        otherwise = otherwise.split(" ")[2];
         if (otherwise) {
           result = this._mapBasedOnSchema(data, otherwise, currentPath);
         }
@@ -133,18 +128,17 @@ class Mapper {
   concat(data, path, currentPath) {
     const valuesToConcat = _.split(path, this.config.concatination.splitter);
 
-    let concatParts = _.map(valuesToConcat, (valueToCalculate) => {
+    let concatParts = _.map(valuesToConcat, valueToCalculate => {
       const concatenationData = this._prepareForConcatenation(valueToCalculate);
-      concatenationData.concatValue = 
-        this._mapBasedOnSchema(data, concatenationData.itemToCalculate, currentPath) || "";
+      concatenationData.concatValue = this._mapBasedOnSchema(data, concatenationData.itemToCalculate, currentPath) || "";
       return concatenationData;
     });
 
-    let finalStr = '';
-    _.forEach(concatParts, (concatData) => {
-      if(!_.isEmpty(concatData.concatValue)) {
-        const starterString = _.isEmpty(finalStr) ? '' : concatData.joiner;
-        finalStr += starterString + concatData.concatValue;        
+    let finalStr = "";
+    _.forEach(concatParts, concatData => {
+      if (!_.isEmpty(concatData.concatValue)) {
+        const starterString = _.isEmpty(finalStr) ? "" : concatData.joiner;
+        finalStr += starterString + concatData.concatValue;
       }
     });
 
@@ -155,129 +149,18 @@ class Mapper {
     currentPath = _.toString(currentPath);
 
     let valuesToRepeatMappingOn = repeatValue.split(this.config.arrayToArraySplitter);
-    valuesToRepeatMappingOn = _.map(valuesToRepeatMappingOn, (item) => _.trim(item));
+    valuesToRepeatMappingOn = _.map(valuesToRepeatMappingOn, item => _.trim(item));
     let allPaths = [];
 
-    _.forEach(valuesToRepeatMappingOn, (path) => {
-      const actualPaths = this._changeWrittenPathToActualPaths(data, path, currentPath);
+    _.forEach(valuesToRepeatMappingOn, path => {
+      const actualPaths = this.changeWrittenPathToActualPaths(data, path, currentPath);
       allPaths = _.concat(allPaths, actualPaths);
     });
 
     return allPaths;
   }
 
-  _prepareForConcatenation(item) {
-    item = _.trim(item);
-
-    const concatenationData = {
-      joiner: ' ',
-      itemToCalculate: item
-    };
-
-    if (_.startsWith(item, this.config.concatination.customConcat)) {
-      const start = _.indexOf(item, '\'');
-      const end = _.lastIndexOf(item, '\'');
-      concatenationData.joiner = item.substring(start + 1, end);
-      concatenationData.itemToCalculate = _.trim(item.substring(end + 1));
-    }
-
-    return concatenationData;
-  }
-
-  _getRepeatType(repeatValue) {
-    let type;
-
-    if(!_.isObject(repeatValue)) {
-      type = '_mapBasedOnArrayNames';
-    }
-
-    else if (!_.isArray(repeatValue)) {
-      type = '_toPrimitiveValues';
-    }
-
-    else {
-      type = '_constructArrayFromData';
-    }
-
-    return type;
-  }
-
-  _mapArray({ data, schema, schemaKey, currentPath }) {
-    const { arrayIdentifier } = this.config;
-    const repeatValue = _.get(schema[schemaKey][0], arrayIdentifier);
-    
-    if(_.isNil(repeatValue)) {
-      throw new Error (`missing array identifier is ${JSON.stringify(schema[schemaKey])}`);
-    }
-
-    let mappedArray;
-    
-    const repeatValueType = this._getRepeatType(repeatValue);
-    mappedArray = this[repeatValueType]({ data, schema, schemaKey, currentPath, repeatValue });
-
-    return mappedArray;
-  }
-
-  _prepareSchemaForPrimitiveValues(schema, schemaKey, keyToFetch) {
-    const subSchemaForArrayItem = this._getSubSchemaForArray(schema, schemaKey);
-    subSchemaForArrayItem[keyToFetch] = this.config.defaultStructurePointer + '.' + keyToFetch;
-    return subSchemaForArrayItem;
-  }
-
-  _toPrimitiveValues({ data, schema, schemaKey, currentPath, repeatValue }) {
-    const { identifierKeyword, arrayNamesKeyword } = this.config.arrayToPrimitiveValues;
-
-    if(!_.has(repeatValue, identifierKeyword)) {
-      throw new Error (`missing the value to pick in ${JSON.stringify(repeatValue)}`);
-    }
-
-    if(!_.has(repeatValue, arrayNamesKeyword)) {
-      throw new Error (`missing the array to map in ${JSON.stringify(repeatValue)}`);      
-    }
-
-    const arrayNames = _.get(repeatValue, arrayNamesKeyword);
-    const keyToFetch = _.get(repeatValue, identifierKeyword);
-
-    const { mapper } = _.find(this.config.arrayMappingTypes, (mType) => {
-      return arrayNames.match(mType.regex);
-    });
-
-    const actualArrayPaths = this[mapper](data, currentPath, arrayNames);
-    const subSchemaForArrayItem = this._prepareSchemaForPrimitiveValues(schema, schemaKey, keyToFetch);
-    const mappedArrayWithKey =  _.map(actualArrayPaths, (path) => {
-      return this.map(data, subSchemaForArrayItem, path);
-    });
-
-    return _.map(mappedArrayWithKey, (item) => {
-      return item[keyToFetch];
-    });
-  }
-
-  _constructArrayFromData({ data, currentPath, repeatValue }) {
-    return _.map(repeatValue, (valueToPush) => {
-      if(_.isObject(valueToPush)) {
-        return this.map(data, valueToPush, currentPath);
-      }
-
-      else {
-        return this._mapBasedOnSchema(data, valueToPush, currentPath);
-      }
-    });
-  }
-
-  _mapBasedOnArrayNames({ data, schema, schemaKey, currentPath, repeatValue }) {
-    const { mapper } = _.find(this.config.arrayMappingTypes, (mType) => {
-      return repeatValue.match(mType.regex);
-    });
-  
-    const actualArrayPaths = this[mapper](data, currentPath, repeatValue);
-    const subSchemaForArrayItem = this._getSubSchemaForArray(schema, schemaKey);
-    return _.map(actualArrayPaths, (path) => {
-      return this.map(data, subSchemaForArrayItem, path);
-    });
-  }
-
-  _changeWrittenPathToActualPaths(data, writtenPath, currentPath) {
+  changeWrittenPathToActualPaths(data, writtenPath, currentPath) {
     let subPathsList = this._splitBasedOnPath(writtenPath);
     const headSubPath = _.head(subPathsList);
 
@@ -285,22 +168,18 @@ class Mapper {
 
     try {
       extractedPaths = this._repeatPathBasedOnArrayLength(headSubPath, data, currentPath);
-    }
-    catch(e) {
+    } catch (e) {
       return [];
     }
 
     subPathsList = _.tail(subPathsList);
-    while(! _.isEmpty(subPathsList)) {
-
+    while (!_.isEmpty(subPathsList)) {
       let concatinatedPaths = [];
-      _.forEach(extractedPaths, (mainPath) => {
+      _.forEach(extractedPaths, mainPath => {
         try {
-          const newExtractedPaths = this._repeatPathBasedOnArrayLength(mainPath + '.' + _.head(subPathsList), data, currentPath);
+          const newExtractedPaths = this._repeatPathBasedOnArrayLength(mainPath + "." + _.head(subPathsList), data, currentPath);
           concatinatedPaths = _.concat(concatinatedPaths, newExtractedPaths);
-        }
-
-        catch(e) {
+        } catch (e) {
           // continue lodash for loop without calculating the path
           return true;
         }
@@ -313,15 +192,120 @@ class Mapper {
     return extractedPaths;
   }
 
+  _prepareForConcatenation(item) {
+    item = _.trim(item);
+
+    const concatenationData = {
+      joiner: " ",
+      itemToCalculate: item
+    };
+
+    if (_.startsWith(item, this.config.concatination.customConcat)) {
+      const start = _.indexOf(item, "'");
+      const end = _.lastIndexOf(item, "'");
+      concatenationData.joiner = item.substring(start + 1, end);
+      concatenationData.itemToCalculate = _.trim(item.substring(end + 1));
+    }
+
+    return concatenationData;
+  }
+
+  _getRepeatType(repeatValue) {
+    let type;
+
+    if (!_.isObject(repeatValue)) {
+      type = "_mapBasedOnArrayNames";
+    } else if (!_.isArray(repeatValue)) {
+      type = "_toPrimitiveValues";
+    } else {
+      type = "_constructArrayFromData";
+    }
+
+    return type;
+  }
+
+  _mapArray({ data, schema, schemaKey, currentPath }) {
+    const { arrayIdentifier } = this.config;
+    const repeatValue = _.get(schema[schemaKey][0], arrayIdentifier);
+
+    if (_.isNil(repeatValue)) {
+      throw new Error(`missing array identifier in ${JSON.stringify(schema[schemaKey])}`);
+    }
+
+    let mappedArray;
+
+    const repeatValueType = this._getRepeatType(repeatValue);
+    mappedArray = this[repeatValueType]({ data, schema, schemaKey, currentPath, repeatValue });
+
+    return mappedArray;
+  }
+
+  _prepareSchemaForPrimitiveValues(schema, schemaKey, keyToFetch) {
+    const subSchemaForArrayItem = this._getSubSchemaForArray(schema, schemaKey);
+    subSchemaForArrayItem[keyToFetch] = this.config.defaultStructurePointer + "." + keyToFetch;
+    return subSchemaForArrayItem;
+  }
+
+  _toPrimitiveValues({ data, schema, schemaKey, currentPath, repeatValue }) {
+    const { identifierKeyword, arrayNamesKeyword } = this.config.arrayToPrimitiveValues;
+
+    if (!_.has(repeatValue, identifierKeyword)) {
+      throw new Error(`missing the value to pick in ${JSON.stringify(repeatValue)}`);
+    }
+
+    if (!_.has(repeatValue, arrayNamesKeyword)) {
+      throw new Error(`missing the array to map in ${JSON.stringify(repeatValue)}`);
+    }
+
+    const arrayNames = _.get(repeatValue, arrayNamesKeyword);
+    const keyToFetch = _.get(repeatValue, identifierKeyword);
+
+    const { mapper } = _.find(this.config.arrayMappingTypes, mType => {
+      return arrayNames.match(mType.regex);
+    });
+
+    const actualArrayPaths = this[mapper](data, currentPath, arrayNames);
+    const subSchemaForArrayItem = this._prepareSchemaForPrimitiveValues(schema, schemaKey, keyToFetch);
+    const mappedArrayWithKey = _.map(actualArrayPaths, path => {
+      return this.map(data, subSchemaForArrayItem, path);
+    });
+
+    return _.map(mappedArrayWithKey, item => {
+      return item[keyToFetch];
+    });
+  }
+
+  _constructArrayFromData({ data, currentPath, repeatValue }) {
+    return _.map(repeatValue, valueToPush => {
+      if (_.isObject(valueToPush)) {
+        return this.map(data, valueToPush, currentPath);
+      } else {
+        return this._mapBasedOnSchema(data, valueToPush, currentPath);
+      }
+    });
+  }
+
+  _mapBasedOnArrayNames({ data, schema, schemaKey, currentPath, repeatValue }) {
+    const { mapper } = _.find(this.config.arrayMappingTypes, mType => {
+      return repeatValue.match(mType.regex);
+    });
+
+    const actualArrayPaths = this[mapper](data, currentPath, repeatValue);
+    const subSchemaForArrayItem = this._getSubSchemaForArray(schema, schemaKey);
+    return _.map(actualArrayPaths, path => {
+      return this.map(data, subSchemaForArrayItem, path);
+    });
+  }
+
   /*
     if first item in the path contains the this pointer (example @this.drivers...)
     we need to keep the first item @this.drivers while splitting the remainder path
     because the mapper can understand @this.drivers while cannot understand @this only
   */
   _splitBasedOnPath(path) {
-    path = path.split('.');
-    if(_.head(path).match(/^@this[0-9]*/)) {
-      const newHead = _.head(path) + '.' + path[1];
+    path = path.split(".");
+    if (_.head(path).match(/^@this[0-9]*/)) {
+      const newHead = _.head(path) + "." + path[1];
       const newTail = _.drop(path, 2);
       path = _.concat([newHead], newTail);
     }
@@ -330,11 +314,11 @@ class Mapper {
   }
 
   _calculateNewCurrentPath(currentPath) {
-    if(currentPath === '') {
-      return '';
+    if (currentPath === "") {
+      return "";
     }
 
-    return currentPath + '.';
+    return currentPath + ".";
   }
 
   _repeatPathBasedOnArrayLength(pathName, data, currentPath) {
@@ -342,19 +326,19 @@ class Mapper {
     const starter = this._calculateNewCurrentPath(currentPath);
     const dataToGet = this.variable(data, pathName, currentPath);
 
-    if(_.isNil(dataToGet)) {
+    if (_.isNil(dataToGet)) {
       // Error will be caught
-      throw new Error('not an array');
+      throw new Error("not an array");
     }
 
-    if(! _.isArray(dataToGet)) {
+    if (!_.isArray(dataToGet)) {
       return [pathName];
     }
 
-    return _.map(dataToGet, (item, index) => pathName + '[' + index + ']');
+    return _.map(dataToGet, (item, index) => pathName + "[" + index + "]");
   }
 
-  _getSubSchemaForArray (schema, schemaKey) {
+  _getSubSchemaForArray(schema, schemaKey) {
     const arrayMapping = _.get(schema, schemaKey);
     const itemInsideArrayMapping = _.cloneDeep(_.head(arrayMapping));
     _.unset(itemInsideArrayMapping, this.config.arrayIdentifier);
@@ -362,9 +346,7 @@ class Mapper {
   }
 
   _compare(data, path, currentPath) {
-    const expValues = this._formatStrArray(path
-      .replace(this.config.conditionRegexs.expValuesReg, '%|%')
-      .split('%|%'));
+    const expValues = this._formatStrArray(path.replace(this.config.conditionRegexs.expValuesReg, "%|%").split("%|%"));
 
     const firstValue = this._mapBasedOnSchema(data, expValues[0], currentPath);
 
@@ -399,18 +381,18 @@ class Mapper {
     const comparatorInSchema = _.head(path.match(this.config.conditionRegexs.comparatorReg));
 
     if (!comparatorInSchema) {
-      throw new Error('No comparator detected in ' + path);
+      throw new Error(`No comparator detected in ${path}`);
     }
 
     return _.camelCase(comparatorInSchema);
   }
 
   _formatStrArray(strArr) {
-    return _.map(_.compact(strArr), (x) => x.trim());
+    return _.map(_.compact(strArr), x => x.trim());
   }
 
   _removeVariableIdentifier(path) {
-    return path.replace('@', '');
+    return path.replace("@", "");
   }
 
   _mapBasedOnSchema(data, mappingValue, currentPath) {
@@ -420,7 +402,7 @@ class Mapper {
 
   _getMappingType(value) {
     value = _.toString(value);
-    return  _.find(this.config.mappingTypes, (mType) => {
+    return _.find(this.config.mappingTypes, mType => {
       return value.match(mType.regex);
     });
   }
@@ -428,30 +410,28 @@ class Mapper {
   _replacePointer(path, currentPath) {
     const pointer = _.head(path.match(this.config.pointerRegex));
 
-    if(_.isNil(pointer)) {
+    if (_.isNil(pointer)) {
       return path;
     }
 
     let numberOfPathsToDrop = _.head(_.compact(pointer.match(/[0-9]*/g)));
 
-    if(_.isNil(numberOfPathsToDrop)) {
+    if (_.isNil(numberOfPathsToDrop)) {
       numberOfPathsToDrop = 0;
-    } 
-    
-    else {
+    } else {
       numberOfPathsToDrop = parseInt(numberOfPathsToDrop);
     }
 
-    const splittedPath = currentPath.split('.');
+    const splittedPath = currentPath.split(".");
 
-    if(numberOfPathsToDrop > splittedPath.length) {
-      throw new Error ('Number in the \'this\' keyword is too big');
+    if (numberOfPathsToDrop > splittedPath.length) {
+      throw new Error("Number in the 'this' keyword is too big");
     }
 
-    const pathToOverride = _.join(_.dropRight(splittedPath, numberOfPathsToDrop), '.');
+    const pathToOverride = _.join(_.dropRight(splittedPath, numberOfPathsToDrop), ".");
 
     return path.replace(this.config.pointerRegex, pathToOverride);
   }
-};
+}
 
 module.exports = Mapper;
