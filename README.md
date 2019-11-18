@@ -1,7 +1,7 @@
 
-A Node module that maps Javascript objects from one form to the other using only JSON schema.
+A Node module that maps JavaScript objects from one form to the other using only JSON schema.
 
-The three main functions are:
+The four main functions are:
 
 - [Structure Mapping](#structure-mapping)
 	- [Repeat Values (for array mapping):](#repeat-values)
@@ -18,6 +18,7 @@ The three main functions are:
 	- [Sub Features](#features)
 	- [$default & $same keywords](#default-keyword)
 - [Translate Paths](#translate-paths)
+- [Enforce Arrays](#enforce-arrays)
 
 Removing undefined values is an option to make the JSON output look cleaner
 
@@ -50,7 +51,7 @@ var  mappedObject  =  sharpMapper.structureMap(oldObject, mappingSchema, REMOVE_
 Data:
 
   
-  
+
 
 ```JSon
 {
@@ -88,7 +89,7 @@ Schema:
 Output:
 
   
-  
+
 
 ```json
 {
@@ -627,7 +628,7 @@ Data:
   "vehicle_id_4": "d",
   "vehicle_id_5": null
 }
-```  
+```
 Schema:
 ```json
 {
@@ -752,7 +753,7 @@ Output:
 
 ## **Value Mapping (Enum Mapping):**
 
-  
+
 ```javascript
 
 var  sharpMapper  =  require('sharp-mapper');
@@ -1090,8 +1091,8 @@ Output:
 ## Translate Paths
 ```javascript
 var sharpMapper  =  require('sharp-mapper');
-var writterPaths = ['path1', 'path2'];
-var actualPaths =  sharpMapper.translatePaths(object, writterPaths);
+var writtenPaths = ['path1', 'path2'];
+var actualPaths =  sharpMapper.translatePaths(object, writtenPaths);
 ```
 
 What this function does is translate generic paths to actual paths from the object.
@@ -1168,6 +1169,78 @@ output
 
 ```
   It basically translates the strings to actual paths. the string (written generic path).
+
+## Enforce Arrays
+
+```javascript
+var sharpMapper  =  require('sharp-mapper');
+var writterPaths = ['path1', 'path2'];
+var updatedObject =  sharpMapper.enforceArrays(object, writtenPaths);
+```
+
+This function enforces a specific JSON structure regarding arrays.
+
+It is useful if you are dealing with a third party that sometimes returns an array as an object if the value is only repeated once. An example for this would be parsing xml to JSON. Since there's no way to actually tell whether a  specified field should be an array or an object, xml parsers return array in the JSON only if the value is repeated.
+
+Example
+
+```json
+{
+  "data": {
+    "policies": {
+      "vehicles": {
+        "Name": "test",
+        "subValues": "a"
+      },
+
+      "houses": [
+        {
+          "Name": "h1",
+          "subValues": "a"
+        },
+        {
+          "Name": "h2",
+          "subValues": ["a", "b"]
+        }
+      ]
+    }
+  }
+}
+```
+
+```javascript
+var sharpMapper  =  require('sharp-mapper');
+var writterPaths = ['data.policies', 'data.policies.vehicles', 'data.policies.vehicles.subValues', 'data.policies.houses', 'data.policies.houses.subValues', 'data.noarry'];
+var updatedObject =  sharpMapper.enforceArrays(object, writtenPaths);
+```
+
+Updated Object is
+
+```json
+{
+  "data": {
+    "policies": [{
+      "vehicles": [{
+        "Name": "test",
+        "subValues": ["a"]
+      }],
+
+      "houses": [
+        {
+          "Name": "h1",
+          "subValues": ["a"]
+        },
+        {
+          "Name": "h2",
+          "subValues": ["a", "b"]
+        }
+      ]
+    }]
+  }
+}
+```
+
+**Note:** This function used the [Translate Paths](#translate-paths) function under the hood to get the actual paths of the data
 
 ## Removing Undefined Values
 
@@ -1320,4 +1393,4 @@ Output (if flag is set to false):
     }
   ]
 }
-``` 
+```
