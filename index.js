@@ -29,7 +29,7 @@ const valueMap = function(objectToMap, schema, removeUndefinedFlag) {
   return format(mappedObject, removeUndefinedFlag);
 };
 
-const  translatePaths = function(data, writtenPaths) {
+const translatePaths = function(data, writtenPaths) {
   if(!Array.isArray(writtenPaths)) throw new Error('Second argument in the translatePaths function must be an array');
 
   const structureMapper = new StructureMapper(config);
@@ -41,6 +41,37 @@ const  translatePaths = function(data, writtenPaths) {
   });
 
   return result;
-}
+};
 
-module.exports = { structureMap, valueMap, translatePaths };
+const enforceArrays = function(data, writtenPaths) {
+  if(!Array.isArray(writtenPaths)) throw new Error('Second argument in the enforceArrays function must be an array');
+
+  const mappedData = _.cloneDeep(data);
+
+  _.forEach(writtenPaths, (pathtoEnforceAsArr) => {
+
+    const splittedPath = _.split(pathtoEnforceAsArr, '.');
+
+    if(splittedPath.length === 1) {
+      const actualData = _.get(mappedData, pathtoEnforceAsArr);
+      if(actualData && !Array.isArray(actualData)) _.set(mappedData, pathtoEnforceAsArr, [actualData]);
+      return;
+    }
+
+    const parentPath = _.join(_.initial(splittedPath), '.');
+    const child = _.last(splittedPath);
+
+    const actualParentsPaths = translatePaths(mappedData, [parentPath]);
+
+    _.forEach(actualParentsPaths, (aParentpath) => {
+      const finalPath = `${aParentpath}.${child}`;
+      const actualData = _.get(mappedData, finalPath);
+
+      if(actualData && !Array.isArray(actualData)) _.set(mappedData, finalPath, [actualData]);
+    });
+  });
+
+  return mappedData;
+};
+
+module.exports = { structureMap, valueMap, translatePaths, enforceArrays };

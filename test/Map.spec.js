@@ -236,4 +236,16 @@ describe('MapService', () => {
       expect(fn).to.throw(Error);
     })
   });
+
+  describe('enforceArrays', () => {
+    it('should successfully enforce the data to arrays', () => {
+      const data = require('./testData/enforce-arr-test/data');
+      const validation = require('./testData/enforce-arr-test/validation');
+
+      const paths = ['data.policies', 'parentArr', 'data.policies.vehicles', 'data.policies.vehicles.subValues', 'data.policies.houses', 'data.policies.houses.subValues', 'data.noarry'];
+      
+      const mapped = MapService.enforceArrays(data, paths);
+      expect(mapped).to.deep.equal(validation);
+    });
+  });
 });

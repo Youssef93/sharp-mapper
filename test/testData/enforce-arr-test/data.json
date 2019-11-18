@@ -1,0 +1,23 @@
+{
+  "data": {
+    "policies": {
+      "vehicles": {
+        "Name": "test",
+        "subValues": "a"
+      },
+
+      "houses": [
+        {
+          "Name": "h1",
+          "subValues": "a"
+        },
+        {
+          "Name": "h2",
+          "subValues": ["a", "b"]
+        }
+      ]
+    }
+  },
+
+  "parentArr": "a"
+}
