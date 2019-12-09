@@ -21,18 +21,16 @@ Schema:
 
 ```json
 {
-
-	"client": {
-		"name": "@clientName",
-		"age": "@clientAge",
-		"address": {
-		"streetNumber": "@clientStreetAddress",
-		"streetName": "@clientStreetName"
-	},
-	"childName": "Mr. $concat @childFirstName $concat $with '' @childMiddleName $concat $with '-' @childLastName"
-	}
+  "client": {
+    "name": "@clientName",
+    "age": "@clientAge",
+    "address": {
+      "streetNumber": "@clientStreetAddress",
+      "streetName": "@clientStreetName"
+    },
+    "childName": "Mr. $concat @childFirstName $concat $with '' @childMiddleName $concat $with '-' @childLastName"
+  }
 }
-
 ```
 
 Output:
@@ -733,6 +731,66 @@ Output:
   "garage": "attached",
   "capacity": 1
 }
+```
+
+------
+
+### Default Keyword
+
+Data:
+
+```json
+{ "garage" : "New Value" }
+```
+
+Shema:
+
+```json
+{
+  "garage": {
+    "this": {
+      "Attached Garage - 1 Car": "attached",
+      "Detached Garage - 1 Car": "attached",
+      "$default": "other"
+    }
+  }
+}
+```
+
+Output:
+
+```json
+{ "garage" : "other" }
+```
+
+------
+
+### Same Keyword
+
+Data
+
+```json
+{ "attribute": "a" }
+```
+
+Schema:
+
+```json
+{
+  "attribute": {
+    "this": {
+      "b": "1",
+      "c": "2",
+      "$default": "$same$"
+    }
+  }
+}
+```
+
+Output:
+
+```json
+{ "attribute": "a" }
 ```
 
 ------
