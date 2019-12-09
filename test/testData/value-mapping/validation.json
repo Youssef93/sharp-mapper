@@ -5,6 +5,8 @@
   "vehicles": [{
     "id": "1",
     "vehicleType": "other",
+    "types": [1,2],
+    "secondTypes": [11, 12],
     "isPersonal": null,
     "drivers": [{
       "id": "driver1"

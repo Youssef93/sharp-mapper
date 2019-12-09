@@ -4,6 +4,7 @@
   "vehicles": [{
     "id": "1",
     "vehicleType": "something else",
+    "types": ["a", "b", "c"],
     "drivers": [{
       "id": "D1"
     }]

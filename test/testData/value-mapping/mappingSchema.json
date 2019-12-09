@@ -28,6 +28,18 @@
       }
     },
 
+    "types": {
+      "this": {
+        "a": 1,
+        "b": 2
+      },
+
+      "secondTypes": {
+        "a": 11,
+        "b": 12
+      }
+    },
+
     "drivers": [{
       "id": {
         "this": {

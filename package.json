@@ -20,5 +20,11 @@
     "chai": "^4.2.0",
     "mocha": "^5.2.0"
   },
-  "keywords": ["mapping", "JSON", "Objects", "Schema", "JSON Shema"]
+  "keywords": [
+    "mapping",
+    "JSON",
+    "Objects",
+    "Schema",
+    "JSON Shema"
+  ]
 }

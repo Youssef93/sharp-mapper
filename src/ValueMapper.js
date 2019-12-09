@@ -12,15 +12,32 @@ class ValueMapper {
 
     _.forOwn(objectToMap, (valueToMap, key) => {
       if(this._isFoundInSchema(key, schema)) {
-        if(_.isArray(valueToMap)) {
+        if(_.isArray(valueToMap) && this._isArrayofPrimitiveValues(valueToMap)) {
+          const mappedValues = {}; 
+
+          const mappedArrinNonPrimitiveForm = _.map(valueToMap, (primitiveValue) => {
+            return this._mapValue(primitiveValue, key, schema);
+          });
+
+          _.forEach(mappedArrinNonPrimitiveForm, (item) => {
+            _.forOwn(item, (value, itemKey) => {
+              if(!mappedValues[itemKey]) mappedValues[itemKey] = [];
+              if(!_.isUndefined(value)) mappedValues[itemKey].push(value);
+            });
+          });
+
+          _.merge(mappedObject, mappedValues);
+        }
+        else if (_.isArray(valueToMap)) {
+          const arrayElementsSchema = _.head(_.get(schema, key));
+
           const mappedArray = _.map(valueToMap, (arrayItem) => {
-            const schemaForArrayItem = _.head(_.get(schema, key));
-            return this.map(arrayItem, schemaForArrayItem);
+            return this.map(arrayItem, arrayElementsSchema);
           });
     
           _.set(mappedObject, key, mappedArray);
         }
-    
+
         else if(_.isObject(valueToMap)) {
           const subSchemaForObject = _.get(schema, key);
           const mappedSubObject = this.map(valueToMap, subSchemaForObject);
@@ -39,6 +56,10 @@ class ValueMapper {
     });
 
     return mappedObject;
+  }
+
+  _isArrayofPrimitiveValues(array) {
+    return !_.find(array, (item) => _.isObject(item));
   }
 
   _mapValue(valueToMap, keyInMainObject, schema) {
@@ -106,6 +127,6 @@ class ValueMapper {
     
     return schema;
   }
-};
+}
 
 module.exports = ValueMapper;
