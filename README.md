@@ -8,14 +8,13 @@ The four main functions are:
 	- [If Conditions](#if-conditions)
 	- [Dates](#dates)
 	- [Arrays](#arrays)
-	- [Construct Array from Non-Array Data](#constructing-an-array-from-non-array-data)
 	- [Repeat Values (for array mapping)](#repeat-values)
 	- [Repeat value - String](#string)
 	- [Repeat value - Array](#array)
 	- [Repeat value - Object](#object)
 - [Value Mapping (Enum Mapping):](#value-mapping-enum-mapping)
-	- [Sub Features](#features)
-	- [$default & $same keywords](#default-keyword)
+	- [$default keyword](#default-keyword)
+	- [$same keyword](#same-keyword)
 - [Translate Paths](#translate-paths)
 - [Enforce Arrays](#enforce-arrays)
 
@@ -26,8 +25,6 @@ Removing undefined values is an option to make the JSON output look cleaner
 All Examples can be found [here](https://github.com/Youssef93/sharp-mapper/blob/master/Examples.md)
 
 ------
-
-
 
 ## Structure Mapping
 
@@ -139,8 +136,7 @@ Click [here](#removing-undefined-values) know more about the `REMOVE_UNDEFINED` 
 
 ### **Features:**
 
-- Extract several items from one item. **EX:**
-
+#### Extract several items from one item
 
 ```json
 
@@ -191,11 +187,19 @@ See Example [here](https://github.com/Youssef93/sharp-mapper/blob/master/Example
 
 #### Same Keyword
 
-Using the `$same$` keyword along with the `$default`. This is in case you have an if/if else/else case
+Using the `$same$` keyword along with the `$default` gives you a behavior similar to if/else if/else case
 
 See Example [here](https://github.com/Youssef93/sharp-mapper/blob/master/Examples.md#same-keyword)
 
+
+
 See a full example [here](https://github.com/Youssef93/sharp-mapper/blob/master/Examples.md#combined-test-case)
+
+#### Note
+
+Values mapping now supports mapping array of primitive values to array of primitive values
+
+------
 
 ## Translate Paths
 ```javascript

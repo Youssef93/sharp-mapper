@@ -1,6 +1,6 @@
 {
   "name": "sharp-mapper",
-  "version": "2.5.1",
+  "version": "2.6.0",
   "description": "JavaScript mapping module",
   "main": "index.js",
   "scripts": {
@@ -21,10 +21,10 @@
     "mocha": "^5.2.0"
   },
   "keywords": [
-    "mapping",
+    "Mapping",
     "JSON",
     "Objects",
     "Schema",
-    "JSON Shema"
+    "JSON Schema"
   ]
 }
