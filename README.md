@@ -1,5 +1,6 @@
-
 Node module that maps JavaScript objects from one form to the other using only JSON schema.
+
+(now supports typescript)
 
 The four main functions are:
 
