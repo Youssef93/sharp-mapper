@@ -7,5 +7,6 @@
   "field6" : null,
   "field7" : "male",
   "field8" : "1990",
-  "field9" : "Joe"
+  "field9" : "Joe",
+  "field10": "a:b"
 }

@@ -7,5 +7,6 @@
   "field6" : "$if @drivers[0].yearsInsured $greater than 2000 $return hello",
   "field7" : "$if @drivers[0].id $equal 181 $return @drivers[0].gender",
   "field8" : "$if @drivers[0].id $not equal 180 $return @drivers[0].dob $otherwise $return yes",
-  "field9" : "$if @drivers[0].id $not equal 181 $return no $otherwise $return @client.name"
+  "field9" : "$if @drivers[0].id $not equal 181 $return no $otherwise $return @client.name",
+  "field10": "$if @client.type $equal a $return a:b $otherwise $return c:d"
 }

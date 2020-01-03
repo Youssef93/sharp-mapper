@@ -1,7 +1,8 @@
 {
   "client": {
     "name": "Joe",
-    "dob": "2000"
+    "dob": "2000",
+    "type": "a"
   },
 
   "drivers": [{
