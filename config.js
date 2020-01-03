@@ -46,13 +46,13 @@ module.exports = {
   },
 
   arrayMappingTypes: [{
-    regex: /^[\)\(@a-z\[\]A-Z0-9.\/\-_]* *(\$\$and [\)\(@a-z\[\]A-Z0-9.\/\-_]*)*/g,
+    regex: /^[\)\(@a-z\[\]A-Z0-9.\/\-_\:]* *(\$\$and [\)\(@a-z\[\]A-Z0-9.\/\-_\:]*)*/g,
     mapper: 'getPaths'
   }],
 
   conditionRegexs: {
     caseReg: new RegExp(
-      /([\)\(@a-z\[\]A-Z0-9.\/\-_]* (\$equal|\$greater than|\$less than|\$not equal) [\)\(@a-z\[\]A-Z0-9.\s\/\-_]* \$return [\\@a-zA-Z\(\)0-9.\s\/\-\[\]_\:]*)/g
+      /([\)\(@a-z\[\]A-Z0-9.\/\-_\:]* (\$equal|\$greater than|\$less than|\$not equal) [\)\(@a-z\[\]A-Z0-9.\s\/\-_\:]* \$return [\\@a-zA-Z\(\)0-9.\s\/\-\[\]_\:]*)/g
     ),
 
     otherwiseReg: new RegExp(

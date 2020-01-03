@@ -1,6 +1,6 @@
 {
   "name": "sharp-mapper",
-  "version": "2.7.1",
+  "version": "2.7.2",
   "description": "JavaScript mapping module",
   "main": "index.js",
   "scripts": {
