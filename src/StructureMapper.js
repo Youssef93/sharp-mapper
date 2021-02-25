@@ -1,7 +1,7 @@
 "use strict";
 
 const _ = require("lodash");
-const moment = require("moment");
+const dayjs = require('dayjs');
 
 const isNumber = function(val) {
   return typeof val === 'number';
@@ -100,7 +100,7 @@ class Mapper {
 
     if (_.isNil(dateValue)) return undefined;
 
-    return moment(dateValue).format(dateFormat);
+    return dayjs(dateValue).format(dateFormat);
   }
 
   ifConditions(data, path, currentPath) {
