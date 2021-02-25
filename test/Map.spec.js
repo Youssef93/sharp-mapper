@@ -1,3 +1,4 @@
+/* eslint-disable global-require */
 "use strict";
 
 const _ = require('lodash');
@@ -171,7 +172,7 @@ describe('MapService', () => {
       const mappingSchema = require('./testData/value-mapping/mappingSchema');
       const validation = require('./testData/value-mapping/validation');
       const mappedObject = MapService.valueMap(data, mappingSchema);
-      //expect(mappedObject).to.deep.equal(validation);
+      expect(mappedObject).to.deep.equal(validation);
 
       const mappedObjectWithUndefinedRemoved = MapService.valueMap(data, mappingSchema, true);
       expect(mappedObjectWithUndefinedRemoved).to.deep.equal(validation);

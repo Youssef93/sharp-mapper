@@ -3,6 +3,10 @@
 const _ = require("lodash");
 const moment = require("moment");
 
+const isNumber = function(val) {
+  return typeof val === 'number';
+};
+
 const comparators = {
   equal: function(firstValue, secondValue) {
     return _.toString(firstValue) === _.toString(secondValue);
@@ -17,7 +21,7 @@ const comparators = {
     firstValue = parseInt(firstValue);
     secondValue = parseInt(secondValue);
 
-    if (_.isNumber(firstValue) && _.isNumber(secondValue)) {
+    if (isNumber(firstValue) && isNumber(secondValue)) {
       result = firstValue > secondValue;
     } else {
       result = null;
@@ -31,7 +35,7 @@ const comparators = {
     firstValue = parseInt(firstValue);
     secondValue = parseInt(secondValue);
 
-    if (_.isNumber(firstValue) && _.isNumber(secondValue)) {
+    if (isNumber(firstValue) && isNumber(secondValue)) {
       result = firstValue < secondValue;
     } else {
       result = null;
@@ -51,13 +55,14 @@ class Mapper {
     currentPath = _.toString(currentPath);
     const mappedObject = {};
 
-    _.forOwn(schema, (schemaValue, schemaKey) => {
+    Object.keys(schema).forEach(schemaKey => {
+      const schemaValue = schema[schemaKey];
       const desiredOutput = _.cloneDeep(schemaValue);
 
-      if (_.isArray(desiredOutput)) {
+      if (Array.isArray(desiredOutput)) {
         const mappedArray = this._mapArray({ data, schema, schemaKey, currentPath });
         _.set(mappedObject, schemaKey, mappedArray);
-      } else if (_.isObject(desiredOutput)) {
+      } else if (this._isObject(desiredOutput)) {
         const subSchemaForObject = _.get(schema, schemaKey);
         const subMappedObject = this.map(data, subSchemaForObject, currentPath);
         _.set(mappedObject, schemaKey, subMappedObject);
@@ -85,11 +90,11 @@ class Mapper {
     path = path.replace(dates.head, "");
 
     let expressionParts = path.split(dates.formatter);
-    expressionParts = _.map(expressionParts, exp => _.trim(exp));
+    expressionParts = expressionParts.map(exp => exp.trim());
 
-    const dateObjectToCalculate = _.head(expressionParts);
+    const dateObjectToCalculate = expressionParts[0];
 
-    const dateFormat = _.last(expressionParts);
+    const dateFormat = expressionParts[expressionParts.length - 1];
 
     const dateValue = this._mapBasedOnSchema(data, dateObjectToCalculate, currentPath);
 
@@ -103,7 +108,7 @@ class Mapper {
     let result = null;
 
     // loop on cases (all if conditions written)
-    _.forEach(expParts, caseExp => {
+    expParts.forEach(caseExp => {
       const compResult = this._compare(data, caseExp, currentPath);
       if (compResult) {
         result = compResult;
@@ -113,9 +118,9 @@ class Mapper {
 
     // if no cases match, look for otherwise
     if (result === null) {
-      let otherwise = _.head(path.match(this.config.conditionRegexs.otherwiseReg));
+      let otherwise = path.match(this.config.conditionRegexs.otherwiseReg);
       if (otherwise) {
-        otherwise = otherwise.split(" ")[2];
+        otherwise = otherwise[0].split(" ")[2];
         if (otherwise) {
           result = this._mapBasedOnSchema(data, otherwise, currentPath);
         }
@@ -126,43 +131,43 @@ class Mapper {
   }
 
   concat(data, path, currentPath) {
-    const valuesToConcat = _.split(path, this.config.concatination.splitter);
+    const valuesToConcat = path.split(this.config.concatination.splitter);
 
-    let concatParts = _.map(valuesToConcat, valueToCalculate => {
+    const concatParts = valuesToConcat.map(valueToCalculate => {
       const concatenationData = this._prepareForConcatenation(valueToCalculate);
       concatenationData.concatValue = this._mapBasedOnSchema(data, concatenationData.itemToCalculate, currentPath) || "";
       return concatenationData;
     });
 
     let finalStr = "";
-    _.forEach(concatParts, concatData => {
+    concatParts.forEach(concatData => {
       if (!_.isEmpty(concatData.concatValue)) {
         const starterString = _.isEmpty(finalStr) ? "" : concatData.joiner;
         finalStr += starterString + concatData.concatValue;
       }
     });
 
-    return _.trim(finalStr);
+    return finalStr.trim();
   }
 
   getPaths(data, currentPath, repeatValue) {
     currentPath = _.toString(currentPath);
 
     let valuesToRepeatMappingOn = repeatValue.split(this.config.arrayToArraySplitter);
-    valuesToRepeatMappingOn = _.map(valuesToRepeatMappingOn, item => _.trim(item));
+    valuesToRepeatMappingOn = valuesToRepeatMappingOn.map(item => item.trim());
     let allPaths = [];
 
-    _.forEach(valuesToRepeatMappingOn, path => {
+    valuesToRepeatMappingOn.forEach(path => {
       const actualPaths = this.changeWrittenPathToActualPaths(data, path, currentPath);
-      allPaths = _.concat(allPaths, actualPaths);
+      allPaths = [...allPaths, ...actualPaths];
     });
 
     return allPaths;
   }
 
   changeWrittenPathToActualPaths(data, writtenPath, currentPath) {
-    let subPathsList = this._splitBasedOnPath(writtenPath);
-    const headSubPath = _.head(subPathsList);
+    const subPathsList = this._splitBasedOnPath(writtenPath);
+    const headSubPath = subPathsList[0];
 
     let extractedPaths;
 
@@ -172,28 +177,29 @@ class Mapper {
       return [];
     }
 
-    subPathsList = _.tail(subPathsList);
-    while (!_.isEmpty(subPathsList)) {
+    subPathsList.shift();
+    while (subPathsList.length) {
       let concatinatedPaths = [];
-      _.forEach(extractedPaths, mainPath => {
+      
+      extractedPaths.forEach(mainPath => {
         try {
-          const newExtractedPaths = this._repeatPathBasedOnArrayLength(mainPath + "." + _.head(subPathsList), data, currentPath);
-          concatinatedPaths = _.concat(concatinatedPaths, newExtractedPaths);
+          const newExtractedPaths = this._repeatPathBasedOnArrayLength(mainPath + "." + subPathsList[0], data, currentPath);
+          concatinatedPaths = [...concatinatedPaths, ...newExtractedPaths];
         } catch (e) {
-          // continue lodash for loop without calculating the path
+          // continue for loop without calculating the path
           return true;
         }
       });
 
       extractedPaths = _.cloneDeep(concatinatedPaths);
-      subPathsList = _.tail(subPathsList);
+      subPathsList.shift();
     }
 
     return extractedPaths;
   }
 
   _prepareForConcatenation(item) {
-    item = _.trim(item);
+    item = item.trim();
 
     const concatenationData = {
       joiner: " ",
@@ -204,7 +210,7 @@ class Mapper {
       const start = _.indexOf(item, "'");
       const end = _.lastIndexOf(item, "'");
       concatenationData.joiner = item.substring(start + 1, end);
-      concatenationData.itemToCalculate = _.trim(item.substring(end + 1));
+      concatenationData.itemToCalculate = item.substring(end + 1).trim();
     }
 
     return concatenationData;
@@ -213,13 +219,9 @@ class Mapper {
   _getRepeatType(repeatValue) {
     let type;
 
-    if (!_.isObject(repeatValue)) {
-      type = "_mapBasedOnArrayNames";
-    } else if (!_.isArray(repeatValue)) {
-      type = "_toPrimitiveValues";
-    } else {
-      type = "_constructArrayFromData";
-    }
+    if(Array.isArray(repeatValue)) type = "_constructArrayFromData";
+    else if (this._isObject(repeatValue)) type = "_toPrimitiveValues";
+    else  type = "_mapBasedOnArrayNames";
 
     return type;
   }
@@ -232,12 +234,8 @@ class Mapper {
       throw new Error(`missing array identifier in ${JSON.stringify(schema[schemaKey])}`);
     }
 
-    let mappedArray;
-
     const repeatValueType = this._getRepeatType(repeatValue);
-    mappedArray = this[repeatValueType]({ data, schema, schemaKey, currentPath, repeatValue });
-
-    return mappedArray;
+    return this[repeatValueType]({ data, schema, schemaKey, currentPath, repeatValue });
   }
 
   _prepareSchemaForPrimitiveValues(schema, schemaKey, keyToFetch) {
@@ -260,24 +258,24 @@ class Mapper {
     const arrayNames = _.get(repeatValue, arrayNamesKeyword);
     const keyToFetch = _.get(repeatValue, identifierKeyword);
 
-    const { mapper } = _.find(this.config.arrayMappingTypes, mType => {
+    const { mapper } = this.config.arrayMappingTypes.find(mType => {
       return arrayNames.match(mType.regex);
     });
 
     const actualArrayPaths = this[mapper](data, currentPath, arrayNames);
     const subSchemaForArrayItem = this._prepareSchemaForPrimitiveValues(schema, schemaKey, keyToFetch);
-    const mappedArrayWithKey = _.map(actualArrayPaths, path => {
+    const mappedArrayWithKey = actualArrayPaths.map(path => {
       return this.map(data, subSchemaForArrayItem, path);
     });
 
-    return _.map(mappedArrayWithKey, item => {
+    return mappedArrayWithKey.map(item => {
       return item[keyToFetch];
     });
   }
 
   _constructArrayFromData({ data, currentPath, repeatValue }) {
-    return _.map(repeatValue, valueToPush => {
-      if (_.isObject(valueToPush)) {
+    return repeatValue.map(valueToPush => {
+      if (this._isObject(valueToPush)) {
         return this.map(data, valueToPush, currentPath);
       } else {
         return this._mapBasedOnSchema(data, valueToPush, currentPath);
@@ -286,13 +284,15 @@ class Mapper {
   }
 
   _mapBasedOnArrayNames({ data, schema, schemaKey, currentPath, repeatValue }) {
-    const { mapper } = _.find(this.config.arrayMappingTypes, mType => {
+
+    const { mapper } = this.config.arrayMappingTypes.find(mType => {
       return repeatValue.match(mType.regex);
     });
 
     const actualArrayPaths = this[mapper](data, currentPath, repeatValue);
     const subSchemaForArrayItem = this._getSubSchemaForArray(schema, schemaKey);
-    return _.map(actualArrayPaths, path => {
+
+    return actualArrayPaths.map(path => {
       return this.map(data, subSchemaForArrayItem, path);
     });
   }
@@ -304,10 +304,10 @@ class Mapper {
   */
   _splitBasedOnPath(path) {
     path = path.split(".");
-    if (_.head(path).match(/^@this[0-9]*/)) {
-      const newHead = _.head(path) + "." + path[1];
+    if (path[0].match(/^@this[0-9]*/)) {
+      const newHead = path[0] + "." + path[1];
       const newTail = _.drop(path, 2);
-      path = _.concat([newHead], newTail);
+      path = [ newHead, ...newTail ];
     }
 
     return path;
@@ -323,7 +323,6 @@ class Mapper {
 
   _repeatPathBasedOnArrayLength(pathName, data, currentPath) {
     pathName = this._replacePointer(pathName, currentPath);
-    const starter = this._calculateNewCurrentPath(currentPath);
     const dataToGet = this.variable(data, pathName, currentPath);
 
     if (_.isNil(dataToGet)) {
@@ -331,11 +330,11 @@ class Mapper {
       throw new Error("not an array");
     }
 
-    if (!_.isArray(dataToGet)) {
+    if (!Array.isArray(dataToGet)) {
       return [pathName];
     }
 
-    return _.map(dataToGet, (item, index) => pathName + "[" + index + "]");
+    return dataToGet.map((item, index) => pathName + "[" + index + "]" );
   }
 
   _getSubSchemaForArray(schema, schemaKey) {
@@ -378,17 +377,17 @@ class Mapper {
   }
 
   _getComparator(path) {
-    const comparatorInSchema = _.head(path.match(this.config.conditionRegexs.comparatorReg));
+    const comparatorInSchema = path.match(this.config.conditionRegexs.comparatorReg);
 
-    if (!comparatorInSchema) {
+    if (!comparatorInSchema || !comparatorInSchema[0]) {
       throw new Error(`No comparator detected in ${path}`);
     }
 
-    return _.camelCase(comparatorInSchema);
+    return _.camelCase(comparatorInSchema[0]);
   }
 
   _formatStrArray(strArr) {
-    return _.map(_.compact(strArr), x => x.trim());
+    return _.compact(strArr).map(x => x.trim());
   }
 
   _removeVariableIdentifier(path) {
@@ -402,7 +401,7 @@ class Mapper {
 
   _getMappingType(value) {
     value = _.toString(value);
-    return _.find(this.config.mappingTypes, mType => {
+    return this.config.mappingTypes.find(mType => {
       return value.match(mType.regex);
     });
   }
@@ -428,9 +427,13 @@ class Mapper {
       throw new Error("Number in the 'this' keyword is too big");
     }
 
-    const pathToOverride = _.join(_.dropRight(splittedPath, numberOfPathsToDrop), ".");
+    const pathToOverride = _.dropRight(splittedPath, numberOfPathsToDrop).join('.');
 
     return path.replace(this.config.pointerRegex, pathToOverride);
+  }
+
+  _isObject(obj) {
+    return Object.prototype.toString.call(obj) === "[object Object]";
   }
 }
 

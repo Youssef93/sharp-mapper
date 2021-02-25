@@ -10,17 +10,19 @@ class ValueMapper {
   map(objectToMap, schema) {
     const mappedObject = {};
 
-    _.forOwn(objectToMap, (valueToMap, key) => {
+    Object.keys(objectToMap).forEach(key => {
+      const valueToMap = objectToMap[key];
       if(this._isFoundInSchema(key, schema)) {
-        if(_.isArray(valueToMap) && this._isArrayofPrimitiveValues(valueToMap)) {
+        if(Array.isArray(valueToMap) && this._isArrayofPrimitiveValues(valueToMap)) {
           const mappedValues = {}; 
 
-          const mappedArrinNonPrimitiveForm = _.map(valueToMap, (primitiveValue) => {
+          const mappedArrinNonPrimitiveForm = valueToMap.map(primitiveValue => {
             return this._mapValue(primitiveValue, key, schema);
           });
 
-          _.forEach(mappedArrinNonPrimitiveForm, (item) => {
-            _.forOwn(item, (value, itemKey) => {
+          mappedArrinNonPrimitiveForm.forEach(item => {
+            Object.keys(item).forEach(itemKey => {
+              const value = item[itemKey];
               if(!mappedValues[itemKey]) mappedValues[itemKey] = [];
               if(!_.isUndefined(value)) mappedValues[itemKey].push(value);
             });
@@ -28,17 +30,17 @@ class ValueMapper {
 
           _.merge(mappedObject, mappedValues);
         }
-        else if (_.isArray(valueToMap)) {
+        else if (Array.isArray(valueToMap)) {
           const arrayElementsSchema = _.head(_.get(schema, key));
 
-          const mappedArray = _.map(valueToMap, (arrayItem) => {
+          const mappedArray = valueToMap.map( arrayItem => {
             return this.map(arrayItem, arrayElementsSchema);
           });
     
           _.set(mappedObject, key, mappedArray);
         }
 
-        else if(_.isObject(valueToMap)) {
+        else if(this._isObject(valueToMap)) {
           const subSchemaForObject = _.get(schema, key);
           const mappedSubObject = this.map(valueToMap, subSchemaForObject);
           _.set(mappedObject, key, mappedSubObject);
@@ -59,11 +61,11 @@ class ValueMapper {
   }
 
   _isArrayofPrimitiveValues(array) {
-    return !_.find(array, (item) => _.isObject(item));
+    return !array.find(item => this._isObject(item));
   }
 
   _mapValue(valueToMap, keyInMainObject, schema) {
-    if(_.isObject(valueToMap)) {
+    if(this._isObject(valueToMap)) {
       throw new Error(`Cannot have an object in the value mapping schema at ${keyInMainObject}`);
     }
 
@@ -88,7 +90,9 @@ class ValueMapper {
     let schemaForThisKey = _.cloneDeep(_.get(schema, keyInMainObject));
     schemaForThisKey = this._replacePointerKeyword(schemaForThisKey, keyInMainObject);
 
-    _.forOwn(schemaForThisKey, (enumCases, schemaKey) => {
+    Object.keys(schemaForThisKey).forEach(schemaKey => {
+      const enumCases = schemaForThisKey[schemaKey];
+
       let mappedItem;
 
       if(_.has(enumCases, valueToMap)) {
@@ -126,6 +130,10 @@ class ValueMapper {
     }
     
     return schema;
+  }
+
+  _isObject(obj) {
+    return Object.prototype.toString.call(obj) === "[object Object]";
   }
 }
 
