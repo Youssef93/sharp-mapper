@@ -3,20 +3,20 @@
 const _ = require("lodash");
 const dayjs = require('dayjs');
 
-const isNumber = function(val) {
+const isNumber = function (val) {
   return typeof val === 'number';
 };
 
 const comparators = {
-  equal: function(firstValue, secondValue) {
+  equal: function (firstValue, secondValue) {
     return _.toString(firstValue) === _.toString(secondValue);
   },
 
-  notEqual: function(firstValue, secondValue) {
+  notEqual: function (firstValue, secondValue) {
     return _.toString(firstValue) !== _.toString(secondValue);
   },
 
-  greaterThan: function(firstValue, secondValue) {
+  greaterThan: function (firstValue, secondValue) {
     let result;
     firstValue = parseInt(firstValue);
     secondValue = parseInt(secondValue);
@@ -30,7 +30,7 @@ const comparators = {
     return result;
   },
 
-  lessThan: function(firstValue, secondValue) {
+  lessThan: function (firstValue, secondValue) {
     let result;
     firstValue = parseInt(firstValue);
     secondValue = parseInt(secondValue);
@@ -54,13 +54,13 @@ class Mapper {
   map(data, schema, currentPath) {
     currentPath = _.toString(currentPath);
     const mappedObject = {};
-
+    
     Object.keys(schema).forEach(schemaKey => {
       const schemaValue = schema[schemaKey];
       const desiredOutput = _.cloneDeep(schemaValue);
 
       if (Array.isArray(desiredOutput)) {
-        const mappedArray = this._mapArray({ data, schema, schemaKey, currentPath });
+        const mappedArray = this._mapArray2({ data, schema, schemaKey, currentPath });
         _.set(mappedObject, schemaKey, mappedArray);
       } else if (this._isObject(desiredOutput)) {
         const subSchemaForObject = _.get(schema, schemaKey);
@@ -180,7 +180,7 @@ class Mapper {
     subPathsList.shift();
     while (subPathsList.length) {
       let concatinatedPaths = [];
-      
+
       extractedPaths.forEach(mainPath => {
         try {
           const newExtractedPaths = this._repeatPathBasedOnArrayLength(mainPath + "." + subPathsList[0], data, currentPath);
@@ -216,85 +216,65 @@ class Mapper {
     return concatenationData;
   }
 
-  _getRepeatType(repeatValue) {
-    let type;
-
-    if(Array.isArray(repeatValue)) type = "_constructArrayFromData";
-    else if (this._isObject(repeatValue)) type = "_toPrimitiveValues";
-    else  type = "_mapBasedOnArrayNames";
-
-    return type;
+  _validateArraySchema({ find, filter, pick, map }) {
+    if((!map &&!pick) || (map && pick)) throw new Error('Subschema of type array must have either pick or map keywords');
+    if(find && filter) throw new Error('Subschema of type array can not contain both find & filter at the same time');
+    return;
   }
 
-  _mapArray({ data, schema, schemaKey, currentPath }) {
-    const { arrayIdentifier } = this.config;
-    const repeatValue = _.get(schema[schemaKey][0], arrayIdentifier);
+  _mapArray2({ data, schema, schemaKey, currentPath }) {
+    const schemaBody = _.get(schema, schemaKey)[0];
 
-    if (_.isNil(repeatValue)) {
-      throw new Error(`missing array identifier in ${JSON.stringify(schema[schemaKey])}`);
-    }
+    this._validateArraySchema(schemaBody);
+    const { arrays, find, filter, pick, map } = schemaBody;
 
-    const repeatValueType = this._getRepeatType(repeatValue);
-    return this[repeatValueType]({ data, schema, schemaKey, currentPath, repeatValue });
-  }
+    if (arrays) {
+      const actualArrayPaths = this.getPaths(data, currentPath, arrays);
 
-  _prepareSchemaForPrimitiveValues(schema, schemaKey, keyToFetch) {
-    const subSchemaForArrayItem = this._getSubSchemaForArray(schema, schemaKey);
-    subSchemaForArrayItem[keyToFetch] = this.config.defaultStructurePointer + "." + keyToFetch;
-    return subSchemaForArrayItem;
-  }
+      let result;
 
-  _toPrimitiveValues({ data, schema, schemaKey, currentPath, repeatValue }) {
-    const { identifierKeyword, arrayNamesKeyword } = this.config.arrayToPrimitiveValues;
+      if (map) {
+        result = actualArrayPaths.map(path => {
+          return this.map(data, map, path);
+        });
 
-    if (!_.has(repeatValue, identifierKeyword)) {
-      throw new Error(`missing the value to pick in ${JSON.stringify(repeatValue)}`);
-    }
-
-    if (!_.has(repeatValue, arrayNamesKeyword)) {
-      throw new Error(`missing the array to map in ${JSON.stringify(repeatValue)}`);
-    }
-
-    const arrayNames = _.get(repeatValue, arrayNamesKeyword);
-    const keyToFetch = _.get(repeatValue, identifierKeyword);
-
-    const { mapper } = this.config.arrayMappingTypes.find(mType => {
-      return arrayNames.match(mType.regex);
-    });
-
-    const actualArrayPaths = this[mapper](data, currentPath, arrayNames);
-    const subSchemaForArrayItem = this._prepareSchemaForPrimitiveValues(schema, schemaKey, keyToFetch);
-    const mappedArrayWithKey = actualArrayPaths.map(path => {
-      return this.map(data, subSchemaForArrayItem, path);
-    });
-
-    return mappedArrayWithKey.map(item => {
-      return item[keyToFetch];
-    });
-  }
-
-  _constructArrayFromData({ data, currentPath, repeatValue }) {
-    return repeatValue.map(valueToPush => {
-      if (this._isObject(valueToPush)) {
-        return this.map(data, valueToPush, currentPath);
-      } else {
-        return this._mapBasedOnSchema(data, valueToPush, currentPath);
+        if(filter) {
+          result = result.filter((item) => this.ifConditions(item, filter, this._calculateNewCurrentPath(currentPath) + schemaKey));
+        }
+  
+        else if (find) {
+          result = result.find((item) => this.ifConditions(item, find, this._calculateNewCurrentPath(currentPath) + schemaKey));
+        }
       }
-    });
-  }
 
-  _mapBasedOnArrayNames({ data, schema, schemaKey, currentPath, repeatValue }) {
+      else if (pick) {
+        result = actualArrayPaths.map(path => {
+          return this.map(data, { '##TEMP##': pick }, path);
+        }).map(x => x['##TEMP##']);
 
-    const { mapper } = this.config.arrayMappingTypes.find(mType => {
-      return repeatValue.match(mType.regex);
-    });
+        const p = {};
+        p[schemaKey] = result;
 
-    const actualArrayPaths = this[mapper](data, currentPath, repeatValue);
-    const subSchemaForArrayItem = this._getSubSchemaForArray(schema, schemaKey);
+        if(filter) {
+          result = result.filter((item, i) => this.ifConditions(p, filter, this._calculateNewCurrentPath(currentPath) + schemaKey + `[${i}]`));
+        }
+  
+        else if (find) {
+          result = result.find((item, i) => this.ifConditions(p, find, this._calculateNewCurrentPath(currentPath) + schemaKey + `[${i}]`));
+        }
+      }
 
-    return actualArrayPaths.map(path => {
-      return this.map(data, subSchemaForArrayItem, path);
-    });
+      return result;
+    }
+
+    else if(map) {
+      return this.map(data, map, currentPath);
+    }
+
+    else if(pick) {
+      if(!Array.isArray(pick)) throw new Error('Pick attribute must be an array in case the attribute \'arrays\' is absent.');
+      return pick.map(p => this._mapBasedOnSchema(data, p, currentPath));
+    }
   }
 
   /*
@@ -307,7 +287,7 @@ class Mapper {
     if (path[0].match(/^@this[0-9]*/)) {
       const newHead = path[0] + "." + path[1];
       const newTail = _.drop(path, 2);
-      path = [ newHead, ...newTail ];
+      path = [newHead, ...newTail];
     }
 
     return path;
@@ -334,14 +314,7 @@ class Mapper {
       return [pathName];
     }
 
-    return dataToGet.map((item, index) => pathName + "[" + index + "]" );
-  }
-
-  _getSubSchemaForArray(schema, schemaKey) {
-    const arrayMapping = _.get(schema, schemaKey);
-    const itemInsideArrayMapping = _.cloneDeep(_.head(arrayMapping));
-    _.unset(itemInsideArrayMapping, this.config.arrayIdentifier);
-    return itemInsideArrayMapping;
+    return dataToGet.map((item, index) => pathName + "[" + index + "]");
   }
 
   _compare(data, path, currentPath) {
