@@ -49,25 +49,23 @@ class Mapper {
     this.comparators = comparators;
   }
 
-  map(data, schema, currentPath) {
+  // main fuction, recursive
+  map(data, schema, currentPath, condition) {
     currentPath = _.toString(currentPath);
     const mappedObject = {};
-    
+
     Object.keys(schema).forEach(schemaKey => {
       const schemaValue = schema[schemaKey];
       const desiredOutput = _.cloneDeep(schemaValue);
 
-      if (utilities.isArray(desiredOutput)) {
-        const mappedArray = this._mapArray({ data, schema, schemaKey, currentPath });
-        _.set(mappedObject, schemaKey, mappedArray);
-      } else if (utilities.isObject(desiredOutput)) {
-        const subSchemaForObject = _.get(schema, schemaKey);
-        const subMappedObject = this.map(data, subSchemaForObject, currentPath);
-        _.set(mappedObject, schemaKey, subMappedObject);
-      } else {
-        const mappedItem = this._mapBasedOnSchema(data, desiredOutput, currentPath);
-        _.set(mappedObject, schemaKey, mappedItem);
-      }
+      let itemToSet;
+
+      if (utilities.isArray(desiredOutput)) itemToSet = this._mapArray({ data, schema, schemaKey, currentPath });
+      else if (utilities.isObject(desiredOutput)) itemToSet = this.map(data, _.get(schema, schemaKey), currentPath);
+      else itemToSet = this._mapBasedOnSchema(data, desiredOutput, currentPath);
+
+      if (!condition) _.set(mappedObject, schemaKey, itemToSet);
+      else if (this.ifConditions(data, condition, currentPath)) _.set(mappedObject, schemaKey, itemToSet);
     });
 
     return mappedObject;
@@ -215,8 +213,8 @@ class Mapper {
   }
 
   _validateArraySchema({ find, filter, pick, map }) {
-    if((!map &&!pick) || (map && pick)) throw new Error('Subschema of type array must have either pick or map keywords');
-    if(find && filter) throw new Error('Subschema of type array can not contain both find & filter at the same time');
+    if ((!map && !pick) || (map && pick)) throw new Error('Subschema of type array must have either pick or map keywords');
+    if (find && filter) throw new Error('Subschema of type array can not contain both find & filter at the same time');
     return;
   }
 
@@ -226,6 +224,8 @@ class Mapper {
     this._validateArraySchema(schemaBody);
     const { arrays, find, filter, pick, map } = schemaBody;
 
+    const condition = filter || find;
+
     if (arrays) {
       const actualArrayPaths = this.getPaths(data, currentPath, arrays);
 
@@ -233,45 +233,32 @@ class Mapper {
 
       if (map) {
         result = actualArrayPaths.map(path => {
-          return this.map(data, map, path);
+          return this.map(data, map, path, condition);
         });
 
-        if(filter) {
-          result = result.filter((item) => this.ifConditions(item, filter, this._calculateNewCurrentPath(currentPath) + schemaKey));
-        }
-  
-        else if (find) {
-          result = result.find((item) => this.ifConditions(item, find, this._calculateNewCurrentPath(currentPath) + schemaKey));
-        }
+        if (filter) result = result.filter(x => Object.keys(x).length);
+        else if (find) result = result.find(x => Object.keys(x).length);
       }
 
       else if (pick) {
         result = actualArrayPaths.map(path => {
-          return this.map(data, { '##TEMP##': pick }, path);
+          return this.map(data, { '##TEMP##': pick }, path, condition);
         }).map(x => x['##TEMP##']);
 
-        const p = {};
-        p[schemaKey] = result;
-
-        if(filter) {
-          result = result.filter((item, i) => this.ifConditions(p, filter, this._calculateNewCurrentPath(currentPath) + schemaKey + `[${i}]`));
-        }
-  
-        else if (find) {
-          result = result.find((item, i) => this.ifConditions(p, find, this._calculateNewCurrentPath(currentPath) + schemaKey + `[${i}]`));
-        }
+        if (filter) result = result.filter(x => x);
+        else if (find) result = result.find(x => x);
       }
 
       return result;
     }
 
-    else if(map) {
-      if(!utilities.isArray(map)) throw new Error('map attribute must be an array in case the attribute \'arrays\' is absent.');
+    else if (map) {
+      if (!utilities.isArray(map)) throw new Error('map attribute must be an array in case the attribute \'arrays\' is absent.');
       return map.map(mapSubItem => this.map(data, mapSubItem, this._calculateNewCurrentPath(currentPath) + schemaKey));
     }
 
-    else if(pick) {
-      if(!utilities.isArray(pick)) throw new Error('pick attribute must be an array in case the attribute \'arrays\' is absent.');
+    else if (pick) {
+      if (!utilities.isArray(pick)) throw new Error('pick attribute must be an array in case the attribute \'arrays\' is absent.');
       return pick.map(p => this._mapBasedOnSchema(data, p, currentPath));
     }
   }
@@ -387,11 +374,8 @@ class Mapper {
 
     let numberOfPathsToDrop = _.head(_.compact(pointer.match(/[0-9]*/g)));
 
-    if (_.isNil(numberOfPathsToDrop)) {
-      numberOfPathsToDrop = 0;
-    } else {
-      numberOfPathsToDrop = parseInt(numberOfPathsToDrop);
-    }
+    if (_.isNil(numberOfPathsToDrop)) numberOfPathsToDrop = 0;
+    else numberOfPathsToDrop = parseInt(numberOfPathsToDrop);
 
     const splittedPath = currentPath.split(".");
 

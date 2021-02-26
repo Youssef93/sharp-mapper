@@ -11,7 +11,6 @@ const admZip = require('adm-zip');
 const MapService = require('../index');
 
 const streamToPromise = async function (data) {
-
   return new Promise((resolve, reject) => {
     data.pipe(fs.createWriteStream('./test/testData.zip')).on('finish', () => resolve()).on('error', (e) => reject(e));
   });
@@ -36,6 +35,23 @@ const downloadTestData = async function () {
   zip.extractAllTo('./test', true);
 };
 
+const execMappingCasualTestCase = function(subFolderName) {
+  const directory = `./testData/${subFolderName}`;
+
+  const dataJ = `${directory}/data`;
+  const mappingJ = `${directory}/mappingSchema`;
+  const validationJ = `${directory}/validation`;
+
+  const data = require(dataJ);
+  const mappingSchema = require(mappingJ);
+  const validation = require(validationJ);
+  const mappedObject = MapService.structureMap(data, mappingSchema);
+  expect(mappedObject).to.deep.equal(validation);
+
+  const mappedObjectWithUndefinedRemoved = MapService.structureMap(data, mappingSchema, true);
+  expect(mappedObjectWithUndefinedRemoved).to.deep.equal(validation);
+};
+
 describe('MapService', () => {  
 
   before(async () => {
@@ -43,127 +59,85 @@ describe('MapService', () => {
     if (!fs.readdirSync('./test/testData').length) await downloadTestData();
   });
 
-
   describe('structureMap', () => {
     it('should test object-to-object mapping', () => {
-      const data = require('./testData/object-to-object/data');
-      const mappingSchema = require('./testData/object-to-object/mappingSchema');
-      const validation = require('./testData/object-to-object/validation');
-      const mappedObject = MapService.structureMap(data, mappingSchema);
-      expect(mappedObject).to.deep.equal(validation);
-
-      const mappedObjectWithUndefinedRemoved = MapService.structureMap(data, mappingSchema, true);
-      expect(mappedObjectWithUndefinedRemoved).to.deep.equal(validation);
+      execMappingCasualTestCase('object-to-object');
     });
 
     it('should test array-to-array mapping', () => {
-      const data = require('./testData/array-to-array/data');
-      const mappingSchema = require('./testData/array-to-array/mappingSchema');
-      const validation = require('./testData/array-to-array/validation');
-      const mappedObject = MapService.structureMap(data, mappingSchema);
-      expect(mappedObject).to.deep.equal(validation);
-
-      const mappedObjectWithUndefinedRemoved = MapService.structureMap(data, mappingSchema, true);
-      expect(mappedObjectWithUndefinedRemoved).to.deep.equal(validation);
+      execMappingCasualTestCase('array-to-array');
     });
 
     it('should test arrayWithinArray-to-arrayWithinArray mapping', () => {
-      const data = require('./testData/arrayWithinArray-to-arrayWithinArray/data');
-      const mappingSchema = require('./testData/arrayWithinArray-to-arrayWithinArray/mappingSchema');
-      const validation = require('./testData/arrayWithinArray-to-arrayWithinArray/validation');
-      const mappedObject = MapService.structureMap(data, mappingSchema);
-      expect(mappedObject).to.deep.equal(validation);
-
-      const mappedObjectWithUndefinedRemoved = MapService.structureMap(data, mappingSchema, true);
-      expect(mappedObjectWithUndefinedRemoved).to.deep.equal(validation);
+      execMappingCasualTestCase('arrayWithinArray-to-arrayWithinArray');
     });
 
     it('should test arrayWithinArray-to-arrayWithinArray mapping with filtering', () => {
-      const data = require('./testData/arrayWithinArray-to-arrayWithinArrayWithFilter/data');
-      const mappingSchema = require('./testData/arrayWithinArray-to-arrayWithinArrayWithFilter/mappingSchema');
-      const validation = require('./testData/arrayWithinArray-to-arrayWithinArrayWithFilter/validation');
-      const mappedObject = MapService.structureMap(data, mappingSchema);
-      expect(mappedObject).to.deep.equal(validation);
-
-      const mappedObjectWithUndefinedRemoved = MapService.structureMap(data, mappingSchema, true);
-      expect(mappedObjectWithUndefinedRemoved).to.deep.equal(validation);
+      execMappingCasualTestCase('arrayWithinArray-to-arrayWithinArrayWithFilter');
     });
 
     it('should test arrayWithinArray-to-arrayWithinArray mapping with find', () => {
-      const data = require('./testData/arrayWithinArray-to-arrayWithinArrayWithFind/data');
-      const mappingSchema = require('./testData/arrayWithinArray-to-arrayWithinArrayWithFind/mappingSchema');
-      const validation = require('./testData/arrayWithinArray-to-arrayWithinArrayWithFind/validation');
-      const mappedObject = MapService.structureMap(data, mappingSchema);
-      expect(mappedObject).to.deep.equal(validation);
-
-      const mappedObjectWithUndefinedRemoved = MapService.structureMap(data, mappingSchema, true);
-      expect(mappedObjectWithUndefinedRemoved).to.deep.equal(validation);
+      execMappingCasualTestCase('arrayWithinArray-to-arrayWithinArrayWithFind');
     });
 
     it('should test dates mapping', () => {
-      const data = require('./testData/dates/data');
-      const mappingSchema = require('./testData/dates/mappingSchema');
-      const validation = require('./testData/dates/validation');
-      const mappedObject = MapService.structureMap(data, mappingSchema);
-      expect(mappedObject).to.deep.equal(validation);
-
-      const mappedObjectWithUndefinedRemoved = MapService.structureMap(data, mappingSchema, true);
-      expect(mappedObjectWithUndefinedRemoved).to.deep.equal(validation);
+      execMappingCasualTestCase('dates');
     });
 
     it('should test if conditions mapping', () => {
-      const data = require('./testData/if-conditions/data');
-      const mappingSchema = require('./testData/if-conditions/mappingSchema');
-      const validation = require('./testData/if-conditions/validation');
-      const mappedObject = MapService.structureMap(data, mappingSchema);
-      expect(mappedObject).to.deep.equal(validation);
-
-      const mappedObjectWithUndefinedRemoved = MapService.structureMap(data, mappingSchema, true);
-      expect(mappedObjectWithUndefinedRemoved).to.deep.equal(validation);
+      execMappingCasualTestCase('if-conditions');
     });
 
     it('should test nested arrays to normalized array mapping', () => {
-      const data = require('./testData/nestedarrays-to-normalizedarrays/data');
-      const mappingSchema = require('./testData/nestedarrays-to-normalizedarrays/mappingSchema');
-      const validation = require('./testData/nestedarrays-to-normalizedarrays/validation');
-      const mappedObject = MapService.structureMap(data, mappingSchema);
-      expect(mappedObject).to.deep.equal(validation);
-
-      const mappedObjectWithUndefinedRemoved = MapService.structureMap(data, mappingSchema, true);
-      expect(mappedObjectWithUndefinedRemoved).to.deep.equal(validation);
+      execMappingCasualTestCase('nestedarrays-to-normalizedarrays');
     });
 
     it('should test nested arrays to normalized array mapping  if array not found in mappingSchema', () => {
-      const data = require('./testData/arrayNestedObjectNull-to-array/data');
-      const mappingSchema = require('./testData/arrayNestedObjectNull-to-array/mappingSchema');
-      const validation = require('./testData/arrayNestedObjectNull-to-array/validation');
-      const mappedObject = MapService.structureMap(data, mappingSchema);
-      expect(mappedObject).to.deep.equal(validation);
-
-      const mappedObjectWithUndefinedRemoved = MapService.structureMap(data, mappingSchema, true);
-      expect(mappedObjectWithUndefinedRemoved).to.deep.equal(validation);
+      execMappingCasualTestCase('arrayNestedObjectNull-to-array');
     });
 
     it('should test nested arrays to normalized array mapping  if array is nested inside object inside array', () => {
-      const data = require('./testData/arrayNestedObject-to-array/data');
-      const mappingSchema = require('./testData/arrayNestedObject-to-array/mappingSchema');
-      const validation = require('./testData/arrayNestedObject-to-array/validation');
-      const mappedObject = MapService.structureMap(data, mappingSchema);
-      expect(mappedObject).to.deep.equal(validation);
-
-      const mappedObjectWithUndefinedRemoved = MapService.structureMap(data, mappingSchema, true);
-      expect(mappedObjectWithUndefinedRemoved).to.deep.equal(validation);
+      execMappingCasualTestCase('arrayNestedObject-to-array');
     });
 
     it('should test handling of null/undefined values', () => {
-      const data = require('./testData/invalid-values-mapping/data');
-      const mappingSchema = require('./testData/invalid-values-mapping/mappingSchema');
-      const validation = require('./testData/invalid-values-mapping/validation');
-      const mappedObject = MapService.structureMap(data, mappingSchema);
-      expect(mappedObject).to.deep.equal(validation);
+      execMappingCasualTestCase('invalid-values-mapping');
+    });
 
-      const mappedObjectWithUndefinedRemoved = MapService.structureMap(data, mappingSchema, true);
-      expect(mappedObjectWithUndefinedRemoved).to.deep.equal(validation);
+    it('should test object to array mapping', () => {
+      execMappingCasualTestCase('object-to-array');
+    });
+
+    it('should test object to nested array mapping', () => {
+      execMappingCasualTestCase('object-to-nestedArray');
+    });
+
+    it('should test array of objects to array of primitive values mapping', () => {
+      execMappingCasualTestCase('array-of-objects-to-array-of-primitive');
+    });
+
+    it('should test array of objects to array of primitive values mapping with filtering', () => {
+      execMappingCasualTestCase('array-of-objects-to-array-of-primitivewithfilter');
+    });
+
+    it('should test array of objects to array of primitive values mapping with find', () => {
+      execMappingCasualTestCase('array-of-objects-to-array-of-primitivewithfind');
+    });
+
+    it('should test array of primitive to array of objects values mapping with filter', () => {
+      execMappingCasualTestCase('array-of-primitive-to-array-of-objectwithfilter');
+    });
+
+    it('should test array of primitive to array of primitive values mapping with filter', () => {
+      execMappingCasualTestCase('array-of-primitive-to-array-of-primitivewithfilter');
+    });
+
+    it('should test array of primitive to array of primitive values mapping with find', () => {
+      execMappingCasualTestCase('array-of-primitive-to-array-of-primitivewithfind');
+    });
+
+    it('should test array of primitive to array of objeci with find', () => {
+      execMappingCasualTestCase('array-of-primitive-to-array-of-objectwithfind');
     });
 
     it('should test handling removing of undefined (not found) values', () => {
@@ -178,61 +152,6 @@ describe('MapService', () => {
       });
 
       expect(mappedObject).to.deep.equal(validationWithUndefined);
-
-      const mappedObjectWithUndefinedRemoved = MapService.structureMap(data, mappingSchema, true);
-      expect(mappedObjectWithUndefinedRemoved).to.deep.equal(validation);
-    });
-
-    it('should test object to array mapping', () => {
-      const data = require('./testData/object-to-array/data');
-      const mappingSchema = require('./testData/object-to-array/mappingSchema');
-      const validation = require('./testData/object-to-array/validation');
-      const mappedObject = MapService.structureMap(data, mappingSchema);
-      expect(mappedObject).to.deep.equal(validation);
-
-      const mappedObjectWithUndefinedRemoved = MapService.structureMap(data, mappingSchema, true);
-      expect(mappedObjectWithUndefinedRemoved).to.deep.equal(validation);
-    });
-
-    it('should test object to nested array mapping', () => {
-      const data = require('./testData/object-to-nestedArray/data');
-      const mappingSchema = require('./testData/object-to-nestedArray/mappingSchema');
-      const validation = require('./testData/object-to-nestedArray/validation');
-      const mappedObject = MapService.structureMap(data, mappingSchema);
-      expect(mappedObject).to.deep.equal(validation);
-
-      const mappedObjectWithUndefinedRemoved = MapService.structureMap(data, mappingSchema, true);
-      expect(mappedObjectWithUndefinedRemoved).to.deep.equal(validation);
-    });
-
-    it('should test array of objects to array of primitive values mapping', () => {
-      const data = require('./testData/array-of-objects-to-array-of-primitive/data');
-      const mappingSchema = require('./testData/array-of-objects-to-array-of-primitive/mappingSchema');
-      const validation = require('./testData/array-of-objects-to-array-of-primitive/validation');
-      const mappedObject = MapService.structureMap(data, mappingSchema);
-      expect(mappedObject).to.deep.equal(validation);
-
-      const mappedObjectWithUndefinedRemoved = MapService.structureMap(data, mappingSchema, true);
-      expect(mappedObjectWithUndefinedRemoved).to.deep.equal(validation);
-    });
-
-    it('should test array of objects to array of primitive values mapping with filtering', () => {
-      const data = require('./testData/array-of-objects-to-array-of-primitivewithfilter/data');
-      const mappingSchema = require('./testData/array-of-objects-to-array-of-primitivewithfilter/mappingSchema');
-      const validation = require('./testData/array-of-objects-to-array-of-primitivewithfilter/validation');
-      const mappedObject = MapService.structureMap(data, mappingSchema);
-      expect(mappedObject).to.deep.equal(validation);
-
-      const mappedObjectWithUndefinedRemoved = MapService.structureMap(data, mappingSchema, true);
-      expect(mappedObjectWithUndefinedRemoved).to.deep.equal(validation);
-    });
-
-    it('should test array of objects to array of primitive values mapping with find', () => {
-      const data = require('./testData/array-of-objects-to-array-of-primitivewithfind/data');
-      const mappingSchema = require('./testData/array-of-objects-to-array-of-primitivewithfind/mappingSchema');
-      const validation = require('./testData/array-of-objects-to-array-of-primitivewithfind/validation');
-      const mappedObject = MapService.structureMap(data, mappingSchema);
-      expect(mappedObject).to.deep.equal(validation);
 
       const mappedObjectWithUndefinedRemoved = MapService.structureMap(data, mappingSchema, true);
       expect(mappedObjectWithUndefinedRemoved).to.deep.equal(validation);
