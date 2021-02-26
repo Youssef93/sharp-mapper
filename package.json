@@ -1,6 +1,6 @@
 {
   "name": "sharp-mapper",
-  "version": "2.7.2",
+  "version": "3.0.0",
   "description": "JavaScript mapping module",
   "main": "index.js",
   "scripts": {
@@ -11,12 +11,14 @@
     "url": "https://github.com/Youssef93/sharp-mapper"
   },
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "dayjs": "^1.10.4",
     "lodash": "^4.17.21"
   },
   "devDependencies": {
+    "adm-zip": "^0.5.3",
+    "axios": "^0.21.1",
     "chai": "^4.3.0",
     "mocha": "^8.3.0"
   },

@@ -2,12 +2,48 @@
 "use strict";
 
 const _ = require('lodash');
-const { describe, it } = require('mocha');
+const { describe, it, before } = require('mocha');
 const { expect } = require('chai');
+const fs = require('fs');
+const axios = require('axios');
+const admZip = require('adm-zip');
 
 const MapService = require('../index');
 
-describe('MapService', () => {
+const streamToPromise = async function (data) {
+
+  return new Promise((resolve, reject) => {
+    data.pipe(fs.createWriteStream('./test/testData.zip')).on('finish', () => resolve()).on('error', (e) => reject(e));
+  });
+};
+
+const downloadTestData = async function () {
+  console.log('Test data is empty, attempting to retrieve it ..');
+  if (!fs.existsSync('./test/testData.zip')) {
+    const res = await axios({
+      url: 'https://raw.githubusercontent.com/Youssef93/sharp-mapper-test-data/main/testData.zip',
+      responseType: 'stream',
+      method: 'GET'
+    });
+
+    await streamToPromise(res.data);
+    console.log('Zip file downloaded from repo');
+  }
+
+  else console.log('File already on disk, unzipping cached file.');
+
+  const zip = new admZip('./test/testData.zip');
+  zip.extractAllTo('./test', true);
+};
+
+describe('MapService', () => {  
+
+  before(async () => {
+    if (!fs.existsSync('./test/testData')) await downloadTestData();
+    if (!fs.readdirSync('./test/testData').length) await downloadTestData();
+  });
+
+
   describe('structureMap', () => {
     it('should test object-to-object mapping', () => {
       const data = require('./testData/object-to-object/data');
@@ -288,7 +324,7 @@ describe('MapService', () => {
       const validation = require('./testData/enforce-arr-test/validation');
 
       const paths = ['data.policies', 'parentArr', 'data.policies.vehicles', 'data.policies.vehicles.subValues', 'data.policies.houses', 'data.policies.houses.subValues', 'data.noarry'];
-      
+
       const mapped = MapService.enforceArrays(data, paths);
       expect(mapped).to.deep.equal(validation);
     });
