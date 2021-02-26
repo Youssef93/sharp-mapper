@@ -2,6 +2,8 @@
 
 const _ = require('lodash');
 
+const utilities = require('./Utilities');
+
 class ValueMapper {
   constructor(config) {
     this.config = config;
@@ -13,7 +15,7 @@ class ValueMapper {
     Object.keys(objectToMap).forEach(key => {
       const valueToMap = objectToMap[key];
       if(this._isFoundInSchema(key, schema)) {
-        if(Array.isArray(valueToMap) && this._isArrayofPrimitiveValues(valueToMap)) {
+        if(utilities.isArray(valueToMap) && this._isArrayofPrimitiveValues(valueToMap)) {
           const mappedValues = {}; 
 
           const mappedArrinNonPrimitiveForm = valueToMap.map(primitiveValue => {
@@ -30,7 +32,7 @@ class ValueMapper {
 
           _.merge(mappedObject, mappedValues);
         }
-        else if (Array.isArray(valueToMap)) {
+        else if (utilities.isArray(valueToMap)) {
           const arrayElementsSchema = _.head(_.get(schema, key));
 
           const mappedArray = valueToMap.map( arrayItem => {
@@ -40,7 +42,7 @@ class ValueMapper {
           _.set(mappedObject, key, mappedArray);
         }
 
-        else if(this._isObject(valueToMap)) {
+        else if(utilities.isObject(valueToMap)) {
           const subSchemaForObject = _.get(schema, key);
           const mappedSubObject = this.map(valueToMap, subSchemaForObject);
           _.set(mappedObject, key, mappedSubObject);
@@ -61,11 +63,11 @@ class ValueMapper {
   }
 
   _isArrayofPrimitiveValues(array) {
-    return !array.find(item => this._isObject(item));
+    return !array.find(item => utilities.isObject(item));
   }
 
   _mapValue(valueToMap, keyInMainObject, schema) {
-    if(this._isObject(valueToMap)) {
+    if(utilities.isObject(valueToMap)) {
       throw new Error(`Cannot have an object in the value mapping schema at ${keyInMainObject}`);
     }
 
@@ -130,10 +132,6 @@ class ValueMapper {
     }
     
     return schema;
-  }
-
-  _isObject(obj) {
-    return Object.prototype.toString.call(obj) === "[object Object]";
   }
 }
 

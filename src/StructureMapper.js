@@ -3,9 +3,7 @@
 const _ = require("lodash");
 const dayjs = require('dayjs');
 
-const isNumber = function (val) {
-  return typeof val === 'number';
-};
+const utilities = require('./Utilities');
 
 const comparators = {
   equal: function (firstValue, secondValue) {
@@ -21,7 +19,7 @@ const comparators = {
     firstValue = parseInt(firstValue);
     secondValue = parseInt(secondValue);
 
-    if (isNumber(firstValue) && isNumber(secondValue)) {
+    if (utilities.isNumber(firstValue) && utilities.isNumber(secondValue)) {
       result = firstValue > secondValue;
     } else {
       result = null;
@@ -35,7 +33,7 @@ const comparators = {
     firstValue = parseInt(firstValue);
     secondValue = parseInt(secondValue);
 
-    if (isNumber(firstValue) && isNumber(secondValue)) {
+    if (utilities.isNumber(firstValue) && utilities.isNumber(secondValue)) {
       result = firstValue < secondValue;
     } else {
       result = null;
@@ -59,10 +57,10 @@ class Mapper {
       const schemaValue = schema[schemaKey];
       const desiredOutput = _.cloneDeep(schemaValue);
 
-      if (Array.isArray(desiredOutput)) {
+      if (utilities.isArray(desiredOutput)) {
         const mappedArray = this._mapArray({ data, schema, schemaKey, currentPath });
         _.set(mappedObject, schemaKey, mappedArray);
-      } else if (this._isObject(desiredOutput)) {
+      } else if (utilities.isObject(desiredOutput)) {
         const subSchemaForObject = _.get(schema, schemaKey);
         const subMappedObject = this.map(data, subSchemaForObject, currentPath);
         _.set(mappedObject, schemaKey, subMappedObject);
@@ -268,12 +266,12 @@ class Mapper {
     }
 
     else if(map) {
-      if(!Array.isArray(map)) throw new Error('map attribute must be an array in case the attribute \'arrays\' is absent.');
+      if(!utilities.isArray(map)) throw new Error('map attribute must be an array in case the attribute \'arrays\' is absent.');
       return map.map(mapSubItem => this.map(data, mapSubItem, this._calculateNewCurrentPath(currentPath) + schemaKey));
     }
 
     else if(pick) {
-      if(!Array.isArray(pick)) throw new Error('pick attribute must be an array in case the attribute \'arrays\' is absent.');
+      if(!utilities.isArray(pick)) throw new Error('pick attribute must be an array in case the attribute \'arrays\' is absent.');
       return pick.map(p => this._mapBasedOnSchema(data, p, currentPath));
     }
   }
@@ -311,7 +309,7 @@ class Mapper {
       throw new Error("not an array");
     }
 
-    if (!Array.isArray(dataToGet)) {
+    if (!utilities.isArray(dataToGet)) {
       return [pathName];
     }
 
@@ -404,10 +402,6 @@ class Mapper {
     const pathToOverride = _.dropRight(splittedPath, numberOfPathsToDrop).join('.');
 
     return path.replace(this.config.pointerRegex, pathToOverride);
-  }
-
-  _isObject(obj) {
-    return Object.prototype.toString.call(obj) === "[object Object]";
   }
 }
 
