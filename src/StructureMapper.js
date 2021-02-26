@@ -60,7 +60,7 @@ class Mapper {
       const desiredOutput = _.cloneDeep(schemaValue);
 
       if (Array.isArray(desiredOutput)) {
-        const mappedArray = this._mapArray2({ data, schema, schemaKey, currentPath });
+        const mappedArray = this._mapArray({ data, schema, schemaKey, currentPath });
         _.set(mappedObject, schemaKey, mappedArray);
       } else if (this._isObject(desiredOutput)) {
         const subSchemaForObject = _.get(schema, schemaKey);
@@ -222,7 +222,7 @@ class Mapper {
     return;
   }
 
-  _mapArray2({ data, schema, schemaKey, currentPath }) {
+  _mapArray({ data, schema, schemaKey, currentPath }) {
     const schemaBody = _.get(schema, schemaKey)[0];
 
     this._validateArraySchema(schemaBody);
@@ -268,11 +268,12 @@ class Mapper {
     }
 
     else if(map) {
-      return this.map(data, map, currentPath);
+      if(!Array.isArray(map)) throw new Error('map attribute must be an array in case the attribute \'arrays\' is absent.');
+      return map.map(mapSubItem => this.map(data, mapSubItem, this._calculateNewCurrentPath(currentPath) + schemaKey));
     }
 
     else if(pick) {
-      if(!Array.isArray(pick)) throw new Error('Pick attribute must be an array in case the attribute \'arrays\' is absent.');
+      if(!Array.isArray(pick)) throw new Error('pick attribute must be an array in case the attribute \'arrays\' is absent.');
       return pick.map(p => this._mapBasedOnSchema(data, p, currentPath));
     }
   }
