@@ -16,10 +16,8 @@ module.exports = {
   }, {
     regex: /.*/,
     mapper: 'constant'
-  }
-  ],
+  }],
 
-  arrayIdentifier: "$$repeat$$",
   arrayToArraySplitter: '$$and',
   pointerRegex: /\@this[0-9]*/g,
   defaultStructurePointer: '@this',
@@ -34,21 +32,11 @@ module.exports = {
     customConcat: '$with'
   },
 
-  arrayToPrimitiveValues: {
-    identifierKeyword: 'pick',
-    arrayNamesKeyword: 'arrays'
-  },
-
   valueMapping: {
     pointer: "this",
     defaultKeyword: "$default",
     sameKeyword: "$same$"
   },
-
-  arrayMappingTypes: [{
-    regex: /^[\)\(@a-z\[\]A-Z0-9.\/\-_\:]* *(\$\$and [\)\(@a-z\[\]A-Z0-9.\/\-_\:]*)*/g,
-    mapper: 'getPaths'
-  }],
 
   conditionRegexs: {
     caseReg: new RegExp(

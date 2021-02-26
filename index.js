@@ -35,7 +35,7 @@ const translatePaths = function(data, writtenPaths) {
   const structureMapper = new StructureMapper(config);
   let result = [];
 
-  _.forEach(writtenPaths, (path) => {
+  writtenPaths.forEach(path => {
     const actualPaths = structureMapper.changeWrittenPathToActualPaths(data, path);
     result = result.concat(actualPaths);
   });
@@ -48,9 +48,8 @@ const enforceArrays = function(data, writtenPaths) {
 
   const mappedData = _.cloneDeep(data);
 
-  _.forEach(writtenPaths, (pathtoEnforceAsArr) => {
-
-    const splittedPath = _.split(pathtoEnforceAsArr, '.');
+  writtenPaths.forEach(pathtoEnforceAsArr => {
+    const splittedPath = pathtoEnforceAsArr.split('.');
 
     if(splittedPath.length === 1) {
       const actualData = _.get(mappedData, pathtoEnforceAsArr);
@@ -58,12 +57,12 @@ const enforceArrays = function(data, writtenPaths) {
       return;
     }
 
-    const parentPath = _.join(_.initial(splittedPath), '.');
+    const parentPath = _.initial(splittedPath).join('.');
     const child = _.last(splittedPath);
 
     const actualParentsPaths = translatePaths(mappedData, [parentPath]);
 
-    _.forEach(actualParentsPaths, (aParentpath) => {
+    actualParentsPaths.forEach(aParentpath => {
       const finalPath = `${aParentpath}.${child}`;
       const actualData = _.get(mappedData, finalPath);
 
